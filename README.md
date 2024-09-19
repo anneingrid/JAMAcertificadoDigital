@@ -1,70 +1,45 @@
-# Getting Started with Create React App
+# JAMA Certificado Digital
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Visão Geral
+Este projeto simula o processo de criação e utilização de um certificado digital, baseado nas diretrizes da Infraestrutura de Chaves Públicas Brasileira (ICP-Brasil). A solução gera um par de chaves RSA de 2048 bits, cria um certificado digital X.509 com informações personalizadas (como país, organização e validade), e usa a chave privada para assinar digitalmente um documento. A chave privada, o certificado e a assinatura são armazenados separadamente.
 
-## Available Scripts
+## Repositório
+O código fonte desta solução pode ser acessado no repositório do GitHub.
 
-In the project directory, you can run:
+## Requisitos
 
-### `npm start`
+### Geração de um Par de Chaves RSA
+- Utilizar uma biblioteca de criptografia para gerar um par de chaves RSA.
+- O tamanho da chave deve ser de 2048 bits.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Criação de um Certificado Digital Simulado
+- O certificado deve ser um X.509 com as seguintes informações:
+  - **País:** BR (Brasil)
+  - **Estado/Província:** TO (Tocantins)
+  - **Localidade:** Palmas
+  - **Organização:** FC Solutions
+  - **Nome Comum:** Seu nome
+  - **Data de início de validade:** Data atual
+  - **Data de término de validade:** Um ano após a data de início
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Salvamento da Chave Privada e do Certificado
+- Salvar a chave privada e o certificado digital em arquivos separados.
 
-### `npm test`
+### Assinatura Digital de um Documento
+- Simular a assinatura digital de um documento de texto simples.
+- Usar a chave privada associada ao certificado para calcular a assinatura digital.
+- Armazenar a assinatura digital em um arquivo separado.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Documentação do Processo
+Documentar o processo passo a passo, incluindo:
+- Instalação da biblioteca de criptografia.
+- Métodos utilizados para geração de chaves, criação de certificado e assinatura digital.
+- Descrição dos códigos utilizados.
+- Apresentação do documento original e do documento assinado.
 
-### `npm run build`
+## Arquitetura
+- **Front-end:** React JS
+- **Back-end e armazenamento:** Supabase
+- **Biblioteca para criptografia:** Node Forge
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+   
