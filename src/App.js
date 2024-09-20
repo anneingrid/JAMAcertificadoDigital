@@ -3,6 +3,7 @@ import GeradorDeChaves from './components/GeradorDeChaves';
 import CertificadoDigital from './components/CertificadoDigital';
 import Assinatura from './components/Assinatura';
 import './App.css';
+import SeletorDeArquivos from './components/Arquivos';
 
 function App() {
   return (
@@ -18,6 +19,9 @@ function App() {
         <div className="card">
           <Assinatura />
         </div>
+      </div>
+      <div>
+        <SeletorDeArquivos/>
       </div>
     </div>
   );
