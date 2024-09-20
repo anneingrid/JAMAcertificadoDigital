@@ -1,16 +1,24 @@
-import logo from './logo.svg';
+import React from 'react';
+import GeradorDeChaves from './components/GeradorDeChaves';
+import CertificadoDigital from './components/CertificadoDigital';
+import Assinatura from './components/Assinatura';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        
-        <p>
-          Bem vindos ao JAMA
-        </p>
-       
-      </header>
+      <h1>JAMA Certificado Digital </h1>
+      <div className="cards-container">
+        <div className="card">
+          <GeradorDeChaves />
+        </div>
+        <div className="card">
+          <CertificadoDigital />
+        </div>
+        <div className="card">
+          <Assinatura />
+        </div>
+      </div>
     </div>
   );
 }
