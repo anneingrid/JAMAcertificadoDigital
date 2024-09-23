@@ -64,3 +64,121 @@ input {
   border-radius: 5px;
   border: 1px solid #ccc;
 }
+
+.cadastro-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fde3ed;
+}
+
+.cadastro-box {
+  max-width: 400px;
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.cadastro-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.cadastro-input {
+  border-radius: 30px;
+  padding: 10px;
+  border: 1px solid #deb0bf;
+  margin-bottom: 10px;
+}
+
+.cadastro-submit {
+  margin-top: 20px;
+  width: 100%;
+  background-color: #df003b95;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  color: #ffffff;
+}
+
+.login-container {
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+.login-link {
+  color: #df003b95;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #deb0bf;
+  width: 100vw;
+}
+
+.login-box {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-title {
+  color: #DF003C;
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
+}
+
+.login-input {
+  border-radius: 30px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+}
+
+.login-submit {
+  margin-top: 20px;
+  width: 100%;
+  background-color: #df003b95;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  color: #fff;
+}
+
+.register-container {
+  margin-top: 15px;
+}
+
+.register-link {
+  color: #df003b95;
+  text-decoration: none;
+  font-weight: bold;
+}
+.dashboard-container {
+  background-color: #deb0bf;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-content {
+  padding: 20px;
+}
+
+
