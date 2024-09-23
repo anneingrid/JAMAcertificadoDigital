@@ -4,8 +4,8 @@ import { AppContext } from '../back/Provider';
 import GeradorDeChaves from '../components/GeradorDeChaves';
 import Assinatura from '../components/Assinatura';
 import CertificadoDigital from '../components/CertificadoDigital';
-import Menu from '../components/Menu';
-import Navbar from '../components/Navbar';
+import Login from './Login';
+
 
 function Principal() {
   const { usuarioLogado, logout } = useContext(AppContext);
@@ -26,25 +26,21 @@ function Principal() {
     navigate('/');
   };
 
-  const renderActiveScreen = () => {
-    switch (activeScreen) {
-      case 'GeradorDeChaves':
-        return <GeradorDeChaves />;
-      case 'Assinatura':
-        return <Assinatura />;
-      case 'CertificadoDigital':
-        return <CertificadoDigital />;
-      default:
-        return <GeradorDeChaves />;
-    }
-  };
 
   return (
-    <div className="principal-container">
-      <Navbar visible={showNavbar} />
-      <Menu setActiveScreen={setActiveScreen} handleLogout={handleLogout} />
-      <div className="principal-content">
-        {renderActiveScreen()}
+    <div className="App">
+      <h1>JAMA Certificado Digital </h1>
+      <button onClick={handleLogout}> SAIR </button>
+      <div className="cards-container">
+        <div className="card">
+          <GeradorDeChaves />
+        </div>
+        <div className="card">
+          <CertificadoDigital />
+        </div>
+        <div className="card">
+          <Assinatura />
+        </div>
       </div>
     </div>
   );

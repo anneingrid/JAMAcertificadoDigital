@@ -1,29 +1,51 @@
-import React from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import GeradorDeChaves from './components/GeradorDeChaves';
+import { AppContext } from '../src/back/Provider';
 import CertificadoDigital from './components/CertificadoDigital';
 import Assinatura from './components/Assinatura';
 import './App.css';
-import SeletorDeArquivos from './components/Arquivos';
+import Login from './pages/Login';
+import Cadastro from './pages/Cadastro';
+import Principal from './pages/Principal';
+
 
 function App() {
+  const { usuarioLogado, logout } = useContext(AppContext);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!usuarioLogado);
+
+  useEffect(() => {
+    setIsAuthenticated(!!usuarioLogado);
+  }, [usuarioLogado]);
+  console.log(usuarioLogado)
+
   return (
-    <div className="App">
-      <h1>JAMA Certificado Digital </h1>
-      <div className="cards-container">
-        <div className="card">
-          <GeradorDeChaves />
-        </div>
-        <div className="card">
-          <CertificadoDigital />
-        </div>
-        <div className="card">
-          <Assinatura />
-        </div>
-      </div>
-      <div>
-        <SeletorDeArquivos/>
-      </div>
-    </div>
+    <Router>
+
+      <Routes>
+
+        <Route
+          path="/"
+          element={isAuthenticated ? <Navigate to="/Principal" /> : <Login setIsAuthenticated={setIsAuthenticated} />} />
+        <Route path="/Cadastro" element={<Cadastro />} />
+        <Route
+          path="/Principal"
+          element={isAuthenticated ? <Principal /> : <Navigate to="/" />} />
+        <Route
+          path="/GeradorDeChaves"
+          element={isAuthenticated ? <GeradorDeChaves /> : <Navigate to="/" />} />
+
+        <Route
+          path="/CertificadoDigital"
+          element={isAuthenticated ? <CertificadoDigital /> : <Navigate to="/" />} />
+
+        <Route
+          path="/Assinatura"
+          element={isAuthenticated ? <Assinatura /> : <Navigate to="/" />} />
+
+      </Routes>
+    </Router>
+
   );
 }
 

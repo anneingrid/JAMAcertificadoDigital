@@ -1,20 +1,22 @@
-import React, { createContext, useState, useEffect, Children } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import { supabase } from './ConexaoBD';
-// import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import forge from 'node-forge';
 export const AppContext = createContext();
+
 
 export const AppProvider = ({ children }) => {
 
     // ----------- USUÁRIO LOGADO--------------------
     const [usuarioLogado, setUsuarioLogado] = useState(null);
-
     useEffect(() => {
         const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
+        
         if (usuario) {
-            setUsuarioLogado(usuario);
+            setUsuarioLogado(usuario);    
         }
     }, []);
+
 
     const salvarUsuarioNoLocalStorage = (usuario) => {
         localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
@@ -136,6 +138,7 @@ export const AppProvider = ({ children }) => {
     return (
         <AppContext.Provider value={{
             cadastrarUsuario,
+            usuarioLogado,
             login,
             logout,
             gerarChaves
@@ -144,3 +147,4 @@ export const AppProvider = ({ children }) => {
         </AppContext.Provider>
     );
 };
+

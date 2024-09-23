@@ -109,6 +109,16 @@ input {
   color: #ffffff;
 }
 
+.cadastro-entrar {
+  margin-top: 20px;
+  width: 100%;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  color: black;
+}
+
 .login-container {
   margin-top: 15px;
   font-size: 0.9rem;

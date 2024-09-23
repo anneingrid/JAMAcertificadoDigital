@@ -110,7 +110,7 @@ function Cadastro() {
                             Cadastrar
                         </Button>
 
-                        <div className="login-container">
+                        <div className="cadastro-entrar">
                             <span>Já tem uma conta? </span>
                             <a href="/" className="login-link">Entrar</a>
                         </div>
