@@ -1,5 +1,5 @@
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: "Montserrat", sans-serif;
   background-color: #f0f2f5;
   margin: 0;
   padding: 20px;
@@ -41,6 +41,7 @@ h2 svg {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-family: "Montserrat", sans-serif;
 }
 
 .primary-btn:hover {
@@ -54,6 +55,7 @@ textarea {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
+  font-family: "Montserrat", sans-serif;
 }
 
 input {
@@ -63,6 +65,7 @@ input {
   margin-bottom: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
+  font-family: "Montserrat", sans-serif;
 }
 
 .cadastro-container {
