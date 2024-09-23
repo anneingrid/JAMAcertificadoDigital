@@ -5,6 +5,8 @@ const Assinatura = () => {
   const [signature, setSignature] = useState('');
   const [document, setDocument] = useState('');
   const [conteudoArquivo, setConteudoArquivo] = useState(null);
+  const [editandoNovoArquivo, setEditandoNovoArquivo] = useState(false);
+  const [novoConteudo, setNovoConteudo] = useState('');
 
   const assinarDocumento = () => {
     setSignature('Assinatura digital gerada...');
@@ -40,14 +42,6 @@ const Assinatura = () => {
               'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'], // Para arquivos .docx
             },
           },
-
-          // { Não sei se é necessário aceitar, no nosso contexto
-          //     description: 'Imagens',
-          //     accept: {
-          //         'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-          //     },
-          // }
-
         ],
         excludeAcceptAllOption: true,
         multiple: false,
@@ -56,6 +50,7 @@ const Assinatura = () => {
       const textoDoArquivo = await arquivo.text();
 
       setConteudoArquivo(textoDoArquivo);
+      setEditandoNovoArquivo(false); // Garante que a área de texto para o novo arquivo feche
     } catch (erro) {
       console.error('Erro ao abrir o arquivo:', erro);
     }
@@ -67,29 +62,53 @@ const Assinatura = () => {
         suggestedName: 'novoArquivo.txt',
       });
       const fluxoGravacao = await arquivoParaSalvar.createWritable();
-      await fluxoGravacao.write(conteudoArquivo || 'Texto padrão');
+      await fluxoGravacao.write(novoConteudo || 'Texto padrão');
       await fluxoGravacao.close();
+
+      // Após salvar o arquivo, exibe o conteúdo digitado na tela
+      setConteudoArquivo(novoConteudo);
+      setEditandoNovoArquivo(false); // Fecha a área de texto ao salvar o arquivo
     } catch (erro) {
       console.error('Erro ao salvar o arquivo:', erro);
     }
   };
+
+  const criarNovoArquivo = () => {
+    setEditandoNovoArquivo(true); // Abre a área de texto para criar um novo arquivo
+    setNovoConteudo(''); // Limpa o conteúdo da área de texto
+    setConteudoArquivo(null); // Limpa o conteúdo do arquivo anterior (se houver)
+  };
+
   return (
     <div>
       <h2><FaFileSignature /> Assinar Documento</h2>
-      <div>
+      <div className="alinharBotoes">
         <button onClick={abrirArquivo} className="primary-btn">Abrir Arquivo</button>
-        <button onClick={salvarArquivo} className="primary-btn" >Salvar Arquivo</button>
+        <button onClick={criarNovoArquivo} className="primary-btn">Novo Arquivo</button>
       </div>
-      <div>
+      <div className="alinharBotoes">
         {conteudoArquivo && (
           <div>
             <h3>Conteúdo do Arquivo:</h3>
             <pre>{conteudoArquivo}</pre>
           </div>
         )}
+        {editandoNovoArquivo && (
+          <div>
+            <h3>Novo Arquivo:</h3>
+            <textarea
+              value={novoConteudo}
+              onChange={(e) => setNovoConteudo(e.target.value)}
+              rows={10}
+              placeholder="Digite o conteúdo do novo arquivo aqui..."
+            />
+            <button onClick={salvarArquivo} className="primary-btn">Salvar Arquivo</button>
+          </div>
+        )}
       </div>
-
-      <button className="primary-btn" onClick={assinarDocumento}>Assinar Documento</button>
+      <div className="alinharBotoes">
+        <button className="primary-btn-assinar" onClick={assinarDocumento}>Assinar Documento</button> 
+      </div>
       {signature && (
         <div>
           <h3>Assinatura Digital</h3>
