@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, Children } from 'react';
-// import { supabase } from './ConexaoBD';
+import { supabase } from './ConexaoBD';
 // import bcrypt from 'bcryptjs';
-// import forge from 'node-forge';
+import forge from 'node-forge';
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
@@ -25,7 +25,7 @@ export const AppProvider = ({ children }) => {
     const cadastrarUsuario = async (nome, email, senha) => {
         try {
             const { data: nomeExistente } = await supabase
-                .from('usuarios')
+                .from('Usuario')
                 .select('*')
                 .eq('nome_usuario', nome)
                 .single();
@@ -35,7 +35,7 @@ export const AppProvider = ({ children }) => {
             }
 
             const { data: emailExistente } = await supabase
-                .from('usuarios')
+                .from('Usuario')
                 .select('*')
                 .eq('email', email)
                 .single();
@@ -44,33 +44,47 @@ export const AppProvider = ({ children }) => {
                 return { error: 'E-mail já está em uso. Escolha outro.' };
             }
 
-            const hashedPassword = await hashPassword(senha);
-            const { data, error } = await supabase
-                .from('usuarios')
-                .insert([{ nome_usuario: nome, email: email, senha: hashedPassword }]);
+            const hashedSenha = await hashSenha(senha);
+            const { data: novoUsuario, error } = await supabase
+                .from('Usuario')
+                .insert([{ nome_usuario: nome, email: email, senha: hashedSenha }])
+                .single();
 
             if (error) {
                 console.error('Erro ao cadastrar o usuário:', error.message || error);
                 return { error: 'Erro ao cadastrar o usuário. Tente novamente.' };
             }
 
-            return { success: 'Usuário cadastrado com sucesso!' };
+            // ----------- GERAR E ARMAZENAR CHAVES --------------------
+            const { chavePublica, chavePrivada } = await gerarChaves();
+            const { data: chavesArmazenadas, error: erroArmazenamento } = await supabase
+                .from('Usuario')
+                .update({ chave_publica: chavePublica, chave_privada: chavePrivada })
+                .eq('id_usuario', novoUsuario.id_usuario);
+
+            if (erroArmazenamento) {
+                console.error('Erro ao armazenar as chaves:', erroArmazenamento.message || erroArmazenamento);
+                return { error: 'Erro ao gerar e armazenar as chaves. Tente novamente.' };
+            }
+
+            return { success: 'Usuário cadastrado com sucesso e chaves geradas!' };
         } catch (error) {
             console.error('Erro no processo de cadastro:', error.message || error);
             return { error: 'Erro no processo de cadastro. Tente novamente.' };
         }
     };
-    const hashPassword = async (password) => {
+
+    const hashSenha = async (senha) => {
         const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt);
+        const hash = await bcrypt.hash(senha, salt);
         return hash;
     };
 
     // ----------- LOGIN --------------------
-    const login = async (email, password) => {
+    const login = async (email, senha) => {
         try {
             const { data: usuario, error: fetchError } = await supabase
-                .from('usuarios')
+                .from('Usuario')
                 .select('id_usuario, nome_usuario, senha')
                 .eq('email', email)
                 .single();
@@ -80,9 +94,9 @@ export const AppProvider = ({ children }) => {
                 return { error: 'Usuário não encontrado.' };
             }
 
-            const isPasswordCorrect = bcrypt.compareSync(password, usuario.senha);
+            const senhaCorreta = bcrypt.compareSync(senha, usuario.senha);
 
-            if (!isPasswordCorrect) {
+            if (!senhaCorreta) {
                 return { error: 'Senha incorreta.' };
             }
 
@@ -106,29 +120,11 @@ export const AppProvider = ({ children }) => {
     // ----------- GERAR CHAVES --------------------
     const gerarChaves = async (idUsuario) => {
         try {
-            const { data: buscaUsuario, error: erroBuscaUsuario } = await supabase
-                .from('usuarios')
-                .select('chave_privada, chave_publica')
-                .eq('id_usuario', idUsuario);
-
-
-
             const keyPair = forge.pki.rsa.generateKeyPair({ bits: 2048, e: 0x10001 });
+            const chave_privada = forge.pki.privateKeyToPem(keyPair.privateKey);
+            const chave_publica = forge.pki.publicKeyToPem(keyPair.publicKey);
 
-            const privateKeyPem = forge.pki.privateKeyToPem(keyPair.privateKey);
-            const publicKeyPem = forge.pki.publicKeyToPem(keyPair.publicKey);
-
-            const { data, error } = await supabase
-                .from('usuarios')
-                .update({ chave_publica: publicKeyPem, chave_privada: privateKeyPem })
-                .match({ id_usuario: idUsuario });
-
-            if (error) {
-                console.error('Erro ao armazenar as chaves:', error.message || error);
-                return null;
-            }
-
-            return data;
+            return {chave_privada, chave_publica};
 
         } catch (error) {
             console.error('Erro ao gerar o par de chaves:', error.message || error);
