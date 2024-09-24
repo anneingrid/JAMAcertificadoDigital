@@ -268,7 +268,7 @@ export const AppProvider = ({ children }) => {
                 .select('chave_publica')
                 .eq('id_usuario', idUsuario);
 
-            if (error || !data.length) {
+            if (error ) {
                 console.error('Erro ao buscar chave pública', error);
                 return null;
             }
@@ -297,8 +297,6 @@ export const AppProvider = ({ children }) => {
             md.update(text, 'utf8');
             const signature = privateKey.sign(md);
     
-            console.log(forge.util.encode64(signature));
-    
             const now = new Date();
             const localTime = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
     
@@ -317,7 +315,7 @@ export const AppProvider = ({ children }) => {
                 return null;
             }
     
-            return data;
+            return md.digest().toHex();
         } catch (error) {
             console.error('Erro ao gerar a assinatura:', error.message || error);
             return null;

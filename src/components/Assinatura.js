@@ -5,7 +5,6 @@ import { supabase } from '../back/ConexaoBD';
 
 const Assinatura = () => {
     const { usuarioLogado, assinar } = useContext(AppContext);
-
     const [signature, setSignature] = useState('');
     const [conteudoArquivo, setConteudoArquivo] = useState(null);
     const [editandoNovoArquivo, setEditandoNovoArquivo] = useState(false);
@@ -16,9 +15,14 @@ const Assinatura = () => {
         try {
             const resultado = await assinar(1, usuarioLogado.id_usuario, conteudoArquivo);
             if (resultado) {
-                setSignature('Assinatura digital gerada com sucesso!');
-            } else {
-                setSignature('Erro ao gerar a assinatura.');
+                setSignature(
+                    <>
+                        <div style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                            <span>✅ Assinatura gerada com sucesso!</span>
+                        </div>
+                        <span>🔐 Hash: {resultado}</span>
+                    </>
+                );
             }
         } catch (error) {
             console.error('Erro ao assinar o documento:', error.message);
@@ -149,8 +153,9 @@ const Assinatura = () => {
             </div>
             {signature && (
                 <div>
-                    <h3>Assinatura Digital</h3>
-                    <textarea value={signature} readOnly rows={5} />
+                    <span style={{ display: 'block', maxWidth: '100%', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
+                        {signature}
+                    </span>
                 </div>
             )}
         </div>
