@@ -1,59 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FaCertificate } from 'react-icons/fa';
+import { AppContext } from '../back/Provider';
 
 const CertificadoDigital = () => {
-  const [certificate, setCertificate] = useState('');
-  const [formData, setFormData] = useState({
-    country: 'BR',
-    state: 'TO',
-    locality: 'Palmas',
-    organization: 'JAMA Certificado Digital',
-    commonName: '',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: ''
-  });
+  const { usuarioLogado, certificado, buscarUsuarioPorId } = useContext(AppContext);
+  const [dadosCertificado, setDadosCertificado] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  useEffect(() => {
+    const verificarCertificado = async () => {
+      const usuario = await buscarUsuarioPorId(usuarioLogado.id_usuario);
+      if (usuario && usuario.certificadoDados) {
+        setDadosCertificado(usuario.certificadoDados);
+      }
+    };
+
+    verificarCertificado();
+  }, [usuarioLogado.nome_usuario, buscarUsuarioPorId]);
+
+  const certificar = async () => {
+    const resultado = await certificado(usuarioLogado.id_usuario, usuarioLogado.nome_usuario);
+    if (resultado) {
+      setDadosCertificado(resultado);
+    }
   };
+
 
   const criarCertificado = (e) => {
     e.preventDefault();
-    const endDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0];
-    setCertificate(`
-      -------CERTIFICADO-------
-      Nome do País: ${formData.country}
-      Estado: ${formData.state}
-      Localidade: ${formData.locality}
-      Organização: ${formData.organization}
-      Nome Completo: ${formData.commonName}
-      Data de Início: ${formData.startDate}
-      Data de Término: ${endDate}
-      -------------------------
-    `);
+    certificar();
   };
 
   return (
     <div>
       <h2><FaCertificate /> Criar Certificado Digital</h2>
-      <form onSubmit={criarCertificado}>
-        <label>Nome Completo:</label>
-        <input
-          type="text"
-          name="commonName"
-          value={formData.commonName}
-          onChange={handleChange}
-          placeholder="Seu Nome"
-          required
-        />
-        <button type="submit" className="primary-btn">Criar Certificado</button>
-      </form>
-      {certificate && (
+
+      {dadosCertificado ? (
         <div>
-          <h3>Certificado Gerado</h3>
-          <textarea value={certificate} readOnly rows={10} />
+          <h5>Certificado Existente</h5>
+          <div className="dados">
+            <div className="dados"><strong>Número de Série:</strong> {dadosCertificado.serialNumber}</div>
+
+            <div className="dados"><strong>Emissor: </strong>JAMA Certificado Digital</div>
+            <div className="dados"><strong>Nome Completo:</strong> {dadosCertificado.commonName}</div>
+            <div className="dados"><strong>País: </strong>{dadosCertificado.country}</div>
+            <div className="dados"><strong>Estado:</strong> {dadosCertificado.state}</div>
+            <div className="dados"><strong>Cidade: </strong>{dadosCertificado.locality}</div>
+            <div className="dados"><strong>Data de Início:</strong> {dadosCertificado.validity.notBefore}</div>
+            <div className="dados"><strong>Data de Término: </strong>{dadosCertificado.validity.notAfter}</div>
+          </div>
         </div>
+      ) : (
+
+        <button type="submit" className="primary-btn" onClick={criarCertificado}>Criar Certificado</button>
+
       )}
     </div>
   );

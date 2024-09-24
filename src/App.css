@@ -13,7 +13,7 @@ h1 {
 h2 {
   display: flex;
   align-items: center;
-  color: #DF003C;
+  color: #df003b95;
 }
 
 h2 svg {
@@ -36,16 +36,17 @@ h2 svg {
 
 .primary-btn {
   padding: 10px 20px;
-  background-color: #DF003C;
+  background-color: #df003b95;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-family: "Montserrat", sans-serif;
-  margin-left :5px;
+  margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;
 }
+
 .primary-btn-assinar {
   padding: 10px 20px;
   background-color: #00a316;
@@ -54,19 +55,36 @@ h2 svg {
   border-radius: 5px;
   cursor: pointer;
   font-family: "Montserrat", sans-serif;
-  margin-left :5px;
+  margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;
 }
 
 .primary-btn:hover {
-  background-color: #DF003C;
+  background-color: #df003b95;
 }
-.alinharBotoes{
+
+.dados {
+  font-family: "Courier Prime", monospace;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+}
+
+strong {
+  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+
+}
+h5{
+  color: #00a316;
+}
+.alinharBotoes {
   justify-content: center;
   align-items: center;
   display: flex;
 }
+
 textarea {
   width: 100%;
   height: 100px;
@@ -168,12 +186,18 @@ input {
 }
 
 .login-title {
-  color: #DF003C;
+  color: #df003b95;
   font-size: 2.5rem;
   font-weight: bold;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   margin-bottom: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-nome {
+  text-align: center;
 }
 
 .login-input {
@@ -203,6 +227,7 @@ input {
   text-decoration: none;
   font-weight: bold;
 }
+
 .dashboard-container {
   background-color: #deb0bf;
   margin: 0;
@@ -213,4 +238,8 @@ input {
   padding: 20px;
 }
 
-
+.login-image {
+  width: 100px;
+  justify-content: center;
+  align-items: center;
+}

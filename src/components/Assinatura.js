@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { AppContext } from '../back/Provider'
 import { FaFileSignature } from 'react-icons/fa';
 
 const Assinatura = () => {
+  const { usuarioLogado, assinar } = useContext(AppContext);
+
   const [signature, setSignature] = useState('');
   const [document, setDocument] = useState('');
   const [conteudoArquivo, setConteudoArquivo] = useState(null);
   const [editandoNovoArquivo, setEditandoNovoArquivo] = useState(false);
   const [novoConteudo, setNovoConteudo] = useState('');
 
-  const assinarDocumento = () => {
-    setSignature('Assinatura digital gerada...');
-  };
+  
+  const assinarDocumento = async () => {
+    try {
+        const resultado = await assinar(1,usuarioLogado.id_usuario, conteudoArquivo);
+        if (resultado) {
+            setSignature('Assinatura digital gerada com sucesso!');
+        } else {
+            setSignature('Erro ao gerar a assinatura.');
+        }
+    } catch (error) {
+        console.error('Erro ao assinar o documento:', error.message);
+        setSignature('Erro ao assinar o documento.');
+    }
 
+};
   const abrirArquivo = async () => {
     try {
       // Solicita ao usuário para abrir um arquivo

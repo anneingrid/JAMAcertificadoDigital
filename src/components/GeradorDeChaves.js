@@ -1,28 +1,26 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FaKey } from 'react-icons/fa';
-import {AppContext} from '../back/Provider'
+import { AppContext } from '../back/Provider'
 
 const GeradorDeChaves = () => {
-  const { cadastrarUsuario, buscarUuidPorNome, certificado } = useContext(AppContext);
-  const nomeTeste = 'UsuarioTeste';
-  const cadastrar = async () => {
-    const dados = await cadastrarUsuario(nomeTeste, 'user@exemplo.com', '1234');
-    // if (dados.error) {
-    //   alert('Erro ao cadastrar usuário:', dados.error);
-    // } else {
-    //   alert(dados.sucess)
-    // }
-  }
+  const { cadastrarUsuario, usuarioLogado, certificado, buscarChavePublica } = useContext(AppContext);
+  const [chavePublica, setChavePublica] = useState('');
   const certificar = async () => {
-    const uuid = await buscarUuidPorNome(nomeTeste);
-    console.log(uuid);
-    const resultado = await certificado(uuid);
+    const resultado = await certificado(usuarioLogado.id_usuario);
     console.log(resultado);
   }
+  useEffect(() => {
+    const chave = async () => {
+      const chavePublica = await buscarChavePublica(usuarioLogado.id_usuario);
+      setChavePublica(chavePublica);
+    }
+    chave()
+  }, [usuarioLogado]);
   return (
     <div>
       <h2><FaKey /> Cadastrar</h2>
-      <button onClick={cadastrar} className="primary-btn">Novo Usuário</button>
+      <h5>Chave pública gerada</h5>
+      <p className='dados'>{chavePublica}</p>
       <button onClick={certificar} className="primary-btn">Certificado</button>
 
     </div>

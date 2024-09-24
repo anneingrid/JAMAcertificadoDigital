@@ -25,11 +25,13 @@ function Principal() {
     logout();
     navigate('/');
   };
-
+console.log(usuarioLogado.nome_usuario)
 
   return (
     <div className="App">
       <h1>JAMA Certificado Digital </h1>
+      <h3 className='title-nome'>Seja bem vindo, <span className="login-link">{usuarioLogado.nome_usuario}</span>! </h3>
+
       <button onClick={handleLogout}> SAIR </button>
       <div className="cards-container">
         <div className="card">
