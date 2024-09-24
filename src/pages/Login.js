@@ -34,6 +34,10 @@ function Login({ setIsAuthenticated }) {
                     <h2 className="text-center mb-4 login-title">
                         <img src="/logo.png" alt="JAMA Certificado" className="login-image" />
                     </h2>
+                    <div className="logo">
+                        <span className="jama-text-logo">JAMA</span><br />
+                        <span className="certificado-text-logo">Certificado Digital</span>
+                    </div>
 
                     {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleLogin}>

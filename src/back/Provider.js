@@ -134,7 +134,7 @@ export const AppProvider = ({ children }) => {
                 console.error("Erro:", error.message || error);
                 return null;
             }
-            return data;
+            return 'cadastrado';
         } catch (error) {
             console.error('Erro ao gerar o par de chaves:', error.message || error);
             return null;
@@ -208,7 +208,7 @@ export const AppProvider = ({ children }) => {
             if (error) {
                 throw new Error('Erro:' + error.message);
             } else {
-                alert('Certificado armazenado com sucesso:', data);
+                console.log('Certificado armazenado com sucesso:', data);
             }
             return cert;
 

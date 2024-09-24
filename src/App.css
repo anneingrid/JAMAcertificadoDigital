@@ -20,6 +20,56 @@ h2 svg {
   margin-right: 10px;
 }
 
+.logo-container {
+  text-align: center;
+  line-height: 0.8;
+}
+
+.logo {
+  text-align: center;
+  line-height: 0.8;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.jama-text-logo {
+  display: block;
+  color: #df003b95;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.certificado-text-logo {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #b8b8b895;
+}
+
+.jama-text {
+  display: block;
+  color: #df003b95;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.divider {
+  width: 100%;
+  border-bottom: 2px solid #9e9e9e95;
+  margin: 10px 0;
+}
+
+.certificado-text {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: normal;
+  margin: 0;
+}
+
 .cards-container {
   display: flex;
   justify-content: space-around;
@@ -45,6 +95,33 @@ h2 svg {
   margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: #df003b95;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: "Montserrat", sans-serif;
+  gap: 8px;
+  margin-left: 20px;
+}
+
+h1 {
+  flex: 1;
+  text-align: center;
 }
 
 .primary-btn-assinar {
@@ -76,9 +153,11 @@ strong {
   font-family: "Montserrat", sans-serif;
 
 }
-h5{
+
+h5 {
   color: #00a316;
 }
+
 .alinharBotoes {
   justify-content: center;
   align-items: center;
@@ -172,7 +251,6 @@ input {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #deb0bf;
   width: 100vw;
 }
 
@@ -180,9 +258,15 @@ input {
   background-color: #ffffff;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  /* Sombra aumentada */
   max-width: 400px;
   text-align: center;
+}
+
+.a {
+  color: #df003b95;
+
 }
 
 .login-title {
@@ -191,13 +275,16 @@ input {
   font-weight: bold;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   justify-content: center;
   align-items: center;
 }
 
 .title-nome {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
   text-align: center;
+  flex: 1;
 }
 
 .login-input {
@@ -240,6 +327,20 @@ input {
 
 .login-image {
   width: 100px;
+  justify-content: center;
+  align-items: center;
+}
+
+.cadeado-image {
+  width: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+.cadeado {
+  color: #df003b95;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 10px;
   justify-content: center;
   align-items: center;
 }

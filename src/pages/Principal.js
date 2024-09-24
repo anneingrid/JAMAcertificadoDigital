@@ -4,7 +4,8 @@ import { AppContext } from '../back/Provider';
 import GeradorDeChaves from '../components/GeradorDeChaves';
 import Assinatura from '../components/Assinatura';
 import CertificadoDigital from '../components/CertificadoDigital';
-import Login from './Login';
+import { FaArrowRightFromBracket } from 'react-icons/fa6';
+
 
 
 function Principal() {
@@ -25,14 +26,25 @@ function Principal() {
     logout();
     navigate('/');
   };
-console.log(usuarioLogado.nome_usuario)
 
   return (
     <div className="App">
-      <h1>JAMA Certificado Digital </h1>
-      <h3 className='title-nome'>Seja bem vindo, <span className="login-link">{usuarioLogado.nome_usuario}</span>! </h3>
+      <div >
+        <h2 className="text-center mb-6 cadeado">
+          <img src="/logo.png" alt="JAMA Certificado" className="cadeado-image" />
+        </h2>
+        <div className="logo-container">
+          <span className="jama-text">JAMA</span><br />
+          <span className="certificado-text">Certificado Digital</span>
+        </div>
 
-      <button onClick={handleLogout}> SAIR </button>
+      </div>
+      <div className="divider"></div>
+      <div className="header-container">
+        <h3 className='title-nome'>Olá, <span className="login-link">{usuarioLogado.nome_usuario}</span>! </h3>
+        <button onClick={handleLogout} className="primary"> <FaArrowRightFromBracket /> SAIR </button>
+      </div>
+
       <div className="cards-container">
         <div className="card">
           <GeradorDeChaves />

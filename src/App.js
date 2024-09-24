@@ -17,7 +17,7 @@ function App() {
   useEffect(() => {
     setIsAuthenticated(!!usuarioLogado);
   }, [usuarioLogado]);
-  console.log(usuarioLogado)
+
 
   return (
     <Router>
