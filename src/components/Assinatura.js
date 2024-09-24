@@ -18,9 +18,14 @@ const Assinatura = () => {
                 setSignature(
                     <>
                         <div style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                            <span>✅ Assinatura gerada com sucesso!</span>
+
+  <span style={{ color: '#00a316', fontSize:13.28 }}>✅ Assinatura gerada com sucesso!</span>
                         </div>
-                        <span>🔐 Hash: {resultado}</span>
+                        <div>
+                            <span style={{fontSize:14}}>🔐 Hash:</span>
+
+                        </div>
+                        <span className='dados'>{resultado}</span>
                     </>
                 );
             }
@@ -47,7 +52,7 @@ const Assinatura = () => {
             });
             const arquivo = await arquivoHandle.getFile();
             const textoDoArquivo = await arquivo.text();
-
+            setSignature(null);
             setConteudoArquivo(textoDoArquivo);
             setArquivoParaUpload(arquivo); // Armazena o arquivo para upload
             setEditandoNovoArquivo(false);
@@ -82,6 +87,8 @@ const Assinatura = () => {
         setNovoConteudo('');
         setConteudoArquivo(null);
         setArquivoParaUpload(null);
+        setSignature(null);
+
     };
 
     // Função de upload para o Supabase
@@ -102,6 +109,8 @@ const Assinatura = () => {
                 console.log('Upload realizado com sucesso:', data);
                 alert('Arquivo enviado com sucesso!');
             }
+            setSignature(null);
+
         } catch (error) {
             console.error('Erro no upload:', error.message);
             alert('Erro no upload do arquivo.');
@@ -124,13 +133,14 @@ const Assinatura = () => {
                     Novo Arquivo
                 </button>
             </div>
+            {conteudoArquivo && (
+                <div style={{ justifyContent: "flex-start", alignItems: 'flex-start', marginTop: 20 }}>
+                    <span style={{ textAlign: 'center', fontWeight: 'bold' }}>Conteúdo do Arquivo:</span>
+                    <pre className='dados'>{conteudoArquivo}</pre>
+                </div>
+            )}
             <div className="alinharBotoes">
-                {conteudoArquivo && (
-                    <div>
-                        <h3>Conteúdo do Arquivo:</h3>
-                        <pre>{conteudoArquivo}</pre>
-                    </div>
-                )}
+
                 {editandoNovoArquivo && (
                     <div>
                         <h3>Novo Arquivo:</h3>
@@ -146,18 +156,22 @@ const Assinatura = () => {
                     </div>
                 )}
             </div>
+
+
             <div className="alinharBotoes">
                 <button className="primary-btn-assinar" onClick={assinarDocumento}>
                     Assinar Documento
                 </button>
             </div>
+
             {signature && (
                 <div>
-                    <span style={{ display: 'block', maxWidth: '100%', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
+                    <span style={{ marginTop: 6, display: 'block', maxWidth: '100%', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
                         {signature}
                     </span>
                 </div>
             )}
+
         </div>
     );
 };

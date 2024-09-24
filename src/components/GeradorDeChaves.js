@@ -38,7 +38,14 @@ const GeradorDeChaves = () => {
       ) : (
         <>
           <h5>Chave pública gerada!</h5>
-          <p className='dados'>{chavePublica}</p>
+          <p className='dados' style={{
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: 9,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        maxHeight: 'calc(1.2em * 9)', // Ajuste conforme necessário para a altura da linha
+    }}>{chavePublica}</p>
         </>
       )}
     </div>
