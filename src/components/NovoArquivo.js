@@ -5,7 +5,6 @@ import { supabase } from '../back/ConexaoBD';
 
 const NovoArquivo = () => {
     const { usuarioLogado} = useContext(AppContext);
-    const [signature, setSignature] = useState('');
     const [conteudoArquivo, setConteudoArquivo] = useState(null);
     const [editandoNovoArquivo, setEditandoNovoArquivo] = useState(false);
     const [novoConteudo, setNovoConteudo] = useState('');
