@@ -19,7 +19,7 @@ h1 {
 margin-bottom: 5px;
 }
 .iconTop{
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 h2 svg {
@@ -29,6 +29,7 @@ h2 svg {
 .logo-container {
   text-align: center;
   line-height: 0.8;
+
 }
 
 .logo {
@@ -79,7 +80,9 @@ h2 svg {
 .cards-container {
   display: flex;
   justify-content: space-around;
-  margin-top: 20px;
+  margin: 15px 0;
+  padding: 0;
+
 }
 
 .card {
@@ -115,6 +118,8 @@ h2 svg {
   margin-right: 5px;
   margin-bottom: 5px;
   font-size: 14px;
+  align-items:center;
+  justify-content: center;
 }
 
 .header-container {
@@ -122,6 +127,7 @@ h2 svg {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  margin: 0 20px;
 }
 
 .primary {
@@ -282,8 +288,8 @@ input {
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  /* Sombra aumentada */
-  max-width: 400px;
+ 
+width: 400px;
   text-align: center;
 }
 

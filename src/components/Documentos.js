@@ -1,30 +1,33 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { supabase } from '../back/ConexaoBD';
 import { AppContext } from '../back/Provider';
 import { FaFileSignature, FaFolder } from 'react-icons/fa';
-import { Accordion, Toast, Button } from 'react-bootstrap'; 
+import { Accordion, Toast } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Oval, ThreeDots } from 'react-loader-spinner';
 
 const ListaDocumentos = () => {
-    const { usuarioLogado, assinar,documentosNaoAssinados, fetchDocumentos } = useContext(AppContext);
-    const [documentos, setDocumentos] = useState([]);
-    const [showToast, setShowToast] = useState(false); 
-    const [toastMessage, setToastMessage] = useState(''); 
+    const { usuarioLogado, assinar, documentosNaoAssinados, fetchDocumentos } = useContext(AppContext);
+    const [carregando, setCarregando] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     const assinarDocumento = async (idDocumento) => {
+        setCarregando(true);
         try {
             const resultado = await assinar(idDocumento, usuarioLogado.id_usuario);
             if (resultado) {
                 setToastMessage('✅ Assinatura gerada com sucesso! Hash: ' + resultado);
                 setShowToast(true);
 
-                
+
                 fetchDocumentos();
             }
         } catch (error) {
             console.error('Erro ao assinar o documento:', error.message);
             setToastMessage('❌ Erro ao assinar o documento.');
             setShowToast(true);
+        } finally {
+            setCarregando(false);
         }
     };
 
@@ -58,28 +61,48 @@ const ListaDocumentos = () => {
 
                                 <div>
                                     <button onClick={() => assinarDocumento(documento.id_documento)} className='primary-butao'>
-                                        <FaFileSignature className='icons' /> Assinar
+                                        {carregando ? (
+                                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                <ThreeDots
+                                                    visible={true}
+                                                    height="25"
+                                                    width="25"
+                                                    color="white"
+                                                    secondaryColor="#df003b95"
+                                                    radius="9"
+                                                    ariaLabel="three-dots-loading"
+                                                    wrapperStyle={{}}
+                                                    wrapperClass=""
+                                                />
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <FaFileSignature className='icons' /> Assinar
+                                            </>
+                                        )}
+
                                     </button>
                                 </div>
                             </div>
                         </Accordion.Body>
                     </Accordion.Item>
-                ))}
+                ))
+                }
             </Accordion>
 
             <Toast
                 onClose={() => setShowToast(false)}
                 show={showToast}
-                delay={5000} 
+                delay={5000}
                 autohide
                 style={{
                     position: 'fixed',
                     top: '50%',
                     left: '50%',
-                    transform: 'translate(-50%, -50%)', 
-                    minWidth: '400px', 
-                    textAlign: 'center', 
-                    zIndex: 9999 
+                    transform: 'translate(-50%, -50%)',
+                    minWidth: '400px',
+                    textAlign: 'center',
+                    zIndex: 9999
                 }}
             >
                 <Toast.Header>

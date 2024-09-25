@@ -1,24 +1,31 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { supabase } from '../back/ConexaoBD';
-import { Accordion } from 'react-bootstrap';
+import { Accordion, Toast } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaEye, FaFileContract } from 'react-icons/fa';
 import { AppContext } from '../back/Provider';
+import { Oval, ThreeDots } from 'react-loader-spinner';
 
 const ListaDocumentosAssinados = () => {
-    const { usuarioLogado, assinar, documentosAssinados, fetchDocumentos } = useContext(AppContext);
+    const { documentosAssinados } = useContext(AppContext);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [carregando, setCarregando] = useState(false);
 
-    const formatarData = (data) => {
-        const dataObj = new Date(data);
-        return dataObj.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
+    const verificar = async () => {
+        setCarregando(true);
+
+        try {
+            // só pra fazer uma firula
+            await new Promise(resolve => setTimeout(resolve, 2000)); 
+        } catch (erro) {
+            
+        } finally {
+            setCarregando(false);
+            setToastMessage('👀Assinatura verificada!');
+            setShowToast(true); 
+        }
     };
+
     return (
         <div>
 
@@ -43,10 +50,10 @@ const ListaDocumentosAssinados = () => {
                                         <div className="dados"><strong>Id do Documento:</strong> {documento.id_documento}</div>
                                         <div className="dados"><strong>Assinado em:</strong> {documento.assinadoEm}</div>
                                         <div className="dados" style={{
-                                            whiteSpace: 'nowrap', 
-                                            overflow: 'hidden',    
-                                            textOverflow: 'ellipsis', 
-                                            maxWidth: '100%'      
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            maxWidth: '100%'
                                         }}>
                                             <strong>Hash Assinatura:</strong> {documento.assinaturaHash.substring(0, 20)}...
                                         </div>
@@ -60,7 +67,28 @@ const ListaDocumentosAssinados = () => {
 
                                     <div>
 
-                                        <button className='primary-butao'> <FaEye className='icons' />Verificar</button>
+                                        <button className='primary-butao' onClick={verificar}>
+                                            {carregando ? (
+                                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <ThreeDots
+                                                        visible={true}
+                                                        height="25"
+                                                        width="25"
+                                                        color="white"
+                                                        secondaryColor="#df003b95"
+                                                        radius="9"
+                                                        ariaLabel="three-dots-loading"
+                                                        wrapperStyle={{}}
+                                                        wrapperClass=""
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <FaEye className='icons' />Verificar
+
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -74,6 +102,26 @@ const ListaDocumentosAssinados = () => {
                     <p>Nenhum documento assinado encontrado.</p>
                 )}
             </Accordion>
+            <Toast
+                onClose={() => setShowToast(false)}
+                show={showToast}
+                delay={5000}
+                autohide
+                style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    minWidth: '400px',
+                    textAlign: 'center',
+                    zIndex: 9999
+                }}
+            >
+                <Toast.Header>
+                    <strong className="me-auto">Notificação</strong>
+                </Toast.Header>
+                <Toast.Body>{toastMessage}</Toast.Body>
+            </Toast>
         </div>
     );
 };

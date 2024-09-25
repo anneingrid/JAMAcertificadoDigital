@@ -6,28 +6,28 @@ import { MutatingDots } from 'react-loader-spinner';
 const CertificadoDigital = () => {
   const { usuarioLogado, certificado, buscarUsuarioPorId } = useContext(AppContext);
   const [dadosCertificado, setDadosCertificado] = useState(null);
-  const [carregando, setCarregando] = useState(true);
+  const [carregandu, setCarregandu] = useState(true);
 
   useEffect(() => {
     const verificarCertificado = async () => {
-      setCarregando(true);
+      setCarregandu(true);
       const usuario = await buscarUsuarioPorId(usuarioLogado.id_usuario);
       if (usuario && usuario.certificadoDados) {
         setDadosCertificado(usuario.certificadoDados);
       }
-      setCarregando(false);
+      setCarregandu(false);
     };
 
     verificarCertificado();
   }, [usuarioLogado.id_usuario, usuarioLogado.nome_usuario, buscarUsuarioPorId]);
 
   const certificar = async () => {
-    setCarregando(true);
+    setCarregandu(true);
     const resultado = await certificado(usuarioLogado.id_usuario, usuarioLogado.nome_usuario);
     if (resultado) {
       setDadosCertificado(resultado);
     }
-    setCarregando(false);
+    setCarregandu(false);
   };
 
   const criarCertificado = (e) => {
@@ -43,7 +43,7 @@ const CertificadoDigital = () => {
     <div>
       <span className="hdois"><FaCertificate className='iconTop'/> Certificado Digital</span>
 
-      {carregando ? (
+      {carregandu ? (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <MutatingDots
             visible={true}

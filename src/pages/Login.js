@@ -32,7 +32,7 @@ function Login({ setIsAuthenticated }) {
             <Row className="justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
                 <Col md={12} className="login-box">
                     <span className="hdois text-center mb-4 login-title">
-                        <img src="/logo.png" alt="JAMA Certificado" className="login-image" />
+                        <img src="logo.png" alt="JAMA Certificado" className="login-image" />
                     </span>
                     <div className="logo">
                         <span className="jama-text-logo">JAMA</span><br />

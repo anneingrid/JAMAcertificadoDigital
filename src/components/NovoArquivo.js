@@ -1,14 +1,19 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../back/Provider';
-import { FaFile, FaSave, FaFolderOpen, FaFolderPlus } from 'react-icons/fa';
+import { FaFile, FaSave, FaFolderOpen, FaFolderPlus, FaFileUpload } from 'react-icons/fa';
 import { supabase } from '../back/ConexaoBD';
+import { Accordion, Toast } from 'react-bootstrap';
+import { Oval, ThreeDots } from 'react-loader-spinner';
 
 const NovoArquivo = () => {
-    const { usuarioLogado} = useContext(AppContext);
+    const { usuarioLogado, fetchDocumentos } = useContext(AppContext);
     const [conteudoArquivo, setConteudoArquivo] = useState(null);
     const [editandoNovoArquivo, setEditandoNovoArquivo] = useState(false);
     const [novoConteudo, setNovoConteudo] = useState('');
     const [arquivoParaUpload, setArquivoParaUpload] = useState(null);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [carregando, setCarregando] = useState(false);
 
     const abrirArquivo = async () => {
         try {
@@ -51,6 +56,8 @@ const NovoArquivo = () => {
             const blob = new Blob([novoConteudo], { type: 'text/plain' });
             const novoArquivo = new File([blob], 'novoArquivo.txt', { type: 'text/plain' });
             setArquivoParaUpload(novoArquivo);
+            setToastMessage('✔️Arquivo Salvo, pronto para Upload!');
+            setShowToast(true);
         } catch (erro) {
             console.error('Erro ao salvar o arquivo:', erro);
         }
@@ -69,7 +76,7 @@ const NovoArquivo = () => {
             alert('Nenhum arquivo selecionado para upload.');
             return;
         }
-
+        setCarregando(true);
         try {
             const descricaoArquivo = conteudoArquivo ? conteudoArquivo.substring(0, 10) : 'Descrição padrão';
             const { data: documentoData, error: dbError } = await supabase
@@ -125,62 +132,114 @@ const NovoArquivo = () => {
                 console.error('Erro ao atualizar o documento:', updateError.message);
                 alert('Erro ao atualizar o documento com a URL do arquivo.');
             } else {
-                alert('Arquivo enviado e URL salva com sucesso!');
+                setToastMessage('✅Arquivo enviado e URL salva com sucesso!');
+                setShowToast(true);
+                fetchDocumentos();
+
             }
 
         } catch (error) {
             console.error('Erro no upload:', error.message);
             alert('Erro no upload do arquivo.');
+        } finally {
+            setCarregando(false)
         }
     };
 
 
     return (
-        <div>
+        <div style={{
+            alignContent: 'center', alignItems: 'center', justifyContent: 'center', display: 'block',
+        }}>
             <span className="hdois">
                 <FaFile className='iconTop' /> Novo Arquivo
             </span>
-            <div className="alinharBotoes">
-                <button onClick={abrirArquivo} className="primary-butao">
-                    <FaFolderOpen className='icons' />Abrir Arquivo
-                </button>
-                <button onClick={criarNovoArquivo} className="primary-butao">
-                    <FaFolderPlus className='icons' /> Novo Arquivo
-                </button>
-            </div>
-            {conteudoArquivo && (
-                <div style={{ justifyContent: "flex-start", alignItems: 'flex-start', marginTop: 20 }}>
-                    <span style={{ textAlign: 'center', fontWeight: 'bold' }}>Conteúdo do Arquivo:</span>
-                    <pre className='dados'>{conteudoArquivo}</pre>
+            <div style={{ textAlign: 'center', marginTop: 20 }}>
+                <div className="alinharBotoes">
+                    <button onClick={abrirArquivo} className="primary-butao">
+                        <FaFolderOpen className='icons' />Abrir Arquivo
+                    </button>
+                    <button onClick={criarNovoArquivo} className="primary-butao">
+                        <FaFolderPlus className='icons' /> Novo Arquivo
+                    </button>
                 </div>
-            )}
-            <div className="alinharBotoes">
+                {conteudoArquivo && (
+                    <div style={{ justifyContent: "flex-start", alignItems: 'flex-start', marginTop: 20 }}>
+                        <span style={{ fontWeight: 'bold' }}>Conteúdo do Arquivo:</span>
+                        <pre className='dados'>{conteudoArquivo}</pre>
+                    </div>
+                )}
 
-                <button onClick={uploadArquivo} className="primary-butao">
-                    <FaSave className='icons' />Salvar
-                </button>
-            </div>
+                {/* Mostrar o botão de upload apenas se houver um arquivo selecionado e não estiver editando um novo arquivo */}
+                {!editandoNovoArquivo && arquivoParaUpload && (
 
-            <div className="alinharBotoes">
+                    <div className="alinharBotoes">
+                        <button onClick={uploadArquivo} className="primary-butao">
+                            {carregando ? (
+                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <ThreeDots
+                                        visible={true}
+                                        height="25"
+                                        width="25"
+                                        color="white"
+                                        secondaryColor="#df003b95"
+                                        radius="9"
+                                        ariaLabel="three-dots-loading"
+                                        wrapperStyle={{}}
+                                        wrapperClass=""
+                                    />
+                                </div>
+                            ) : (
+                                <>
+                                    <FaFileUpload className='icons' />Salvar
 
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+
+                {/* Área de edição do novo arquivo */}
                 {editandoNovoArquivo && (
                     <div>
-                        <p>Novo Arquivo:</p>
+                        <p style={{ margin: '10px', fontSize: 14 }}>Novo Arquivo:</ p>
                         <textarea
                             value={novoConteudo}
                             onChange={(e) => setNovoConteudo(e.target.value)}
                             rows={10}
                             placeholder="Digite o conteúdo do novo arquivo aqui..."
+                            style={{ fontSize: 14 }}
                         />
                         <button onClick={salvarArquivo} className="primary-butao">
-                            Salvar Arquivo
+                            <FaSave className='icons' />Salvar Arquivo
                         </button>
                     </div>
                 )}
             </div>
-
+            <Toast
+                onClose={() => setShowToast(false)}
+                show={showToast}
+                delay={5000}
+                autohide
+                style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    minWidth: '400px',
+                    textAlign: 'center',
+                    zIndex: 9999
+                }}
+            >
+                <Toast.Header>
+                    <strong className="me-auto">Notificação</strong>
+                </Toast.Header>
+                <Toast.Body>{toastMessage}</Toast.Body>
+            </Toast>
         </div>
     );
+
+
 };
 
 export default NovoArquivo;
