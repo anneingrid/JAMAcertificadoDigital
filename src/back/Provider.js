@@ -269,17 +269,19 @@ export const AppProvider = ({ children }) => {
                 .eq('id_usuario', idUsuario);
 
             if (error) {
-                console.error('Erro ao buscar chave pública', error);
-                return null;
-            }
+                if (error) {
+                    console.error('Erro ao buscar chave pública', error);
+                    return null;
+                }
 
-            const publicKey = (data[0].chave_publica);
-            return publicKey;
+                const publicKey = (data[0].chave_publica);
+                return publicKey;
+            }
         } catch (error) {
             console.error('Erro ao importar chave pública', error.message || error);
             return null;
         }
-    };
+    }
 
     // ----------- ASSINAR --------------------
     const assinar = async (idDocumento, idUsuario, text) => {
@@ -385,7 +387,7 @@ export const AppProvider = ({ children }) => {
             .map(documento => {
                 const assinatura = assinaturas.find(a => a.id_documento === documento.id_documento);
                 return {
-                    ...documento,         
+                    ...documento,
                     assinaturaHash: assinatura.assinatura_hash,
                     assinadoEm: assinatura.assinado_em
                 };
@@ -400,6 +402,86 @@ export const AppProvider = ({ children }) => {
     }, []);
 
 
+
+
+    const obterCertificado = async (idUsuario) => {
+        const { data, error } = await supabase
+            .from('Usuario')
+            .select('certificado')
+            .eq('id_usuario', idUsuario)
+
+        if (error) {
+            throw new Error('Erro ao obter certificado: ' + error.message);
+        }
+
+        return data[0].certificado;
+    };
+
+    const extrairChavePublica = async (certificado) => {
+        try {
+            const pegaCertificado = forge.pki.certificateFromPem(certificado);
+            const chavePublica = forge.pki.publicKeyToPem(pegaCertificado.publicKey);
+            console.log('Chave pública em PEM:', chavePublica);
+        } catch (error) {
+            console.error('Erro ao extrair chave pública:', error);
+        }
+    };
+
+
+    const baixarDocumento = async () => {
+        try {
+            const { data, error } = await supabase.storage
+                .from('documento')
+                .download('12.txt');
+            if (error) {
+                throw new Error('Erro ao baixar o arquivo: ' + error.message);
+            }
+
+            const reader = new FileReader();
+            reader.readAsText(data);
+            return new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+            });
+
+        } catch (error) {
+            console.error('Erro ao baixar o documento:', error.message);
+        }
+    };
+
+    // function verificarAssinatura4(documento, assinaturaBase64, chavePublica) {
+    //     const md = forge.md.sha256.create();
+    //     md.update(documento, 'utf8');
+
+    //     const assinatura = forge.util.decode64(assinaturaBase64);
+
+    //     return chavePublica.verify(md.digest().bytes(), assinatura);
+    // }
+
+    const [arquivos, setArquivos] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchArquivos = async () => {
+        setLoading(true);
+
+        const { data, error } = await supabase.storage.from('documento').list('pasta');
+
+        console.log("Tentando listar arquivos na pasta 'pasta'...");
+
+        if (error) {
+            console.error('Erro ao listar arquivos:', error.message);
+        } else {
+            console.log("Dados recebidos do Supabase:", data);
+            if (data.length === 0) {
+                console.log("Nenhum arquivo encontrado.");
+            }
+            setArquivos(data);
+        }
+
+        setLoading(false);
+    };
+
+
     return (
         <AppContext.Provider value={{
             cadastrarUsuario,
@@ -410,6 +492,13 @@ export const AppProvider = ({ children }) => {
             buscarChavePublica,
             buscarUsuarioPorId,
             assinar,
+            obterCertificado,
+            extrairChavePublica,
+            baixarDocumento,
+            fetchArquivos,
+            arquivos,
+            loading,
+            assinar,
             documentosNaoAssinados,
             documentosAssinados,
             fetchDocumentos
@@ -417,5 +506,4 @@ export const AppProvider = ({ children }) => {
             {children}
         </AppContext.Provider>
     );
-};
-
+}
