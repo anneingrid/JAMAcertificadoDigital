@@ -2,9 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../back/Provider';
 import GeradorDeChaves from '../components/GeradorDeChaves';
-import Assinatura from '../components/Assinatura';
+import NovoArquivo from '../components/NovoArquivo';
 import CertificadoDigital from '../components/CertificadoDigital';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
+import ListaDocumentos from '../components/Documentos';
+import ListaDocumentosAssinados from '../components/DocsAssinados';
 
 
 
@@ -28,11 +30,11 @@ function Principal() {
   };
 
   return (
-    <div className="App">
+    <div >
       <div >
-        <h2 className="text-center mb-6 cadeado">
+        <span className="hdois text-center mb-6 cadeado">
           <img src="/logo.png" alt="JAMA Certificado" className="cadeado-image" />
-        </h2>
+        </span>
         <div className="logo-container">
           <span className="jama-text">JAMA</span><br />
           <span className="certificado-text">Certificado Digital</span>
@@ -53,9 +55,18 @@ function Principal() {
           <CertificadoDigital />
         </div>
         <div className="card">
-          <Assinatura />
+          <NovoArquivo />
         </div>
       </div>
+      <div className="cards-container">
+        <div className="card-lista">
+          <ListaDocumentos />
+        </div>
+        <div className="card-lista">
+          <ListaDocumentosAssinados></ListaDocumentosAssinados>
+        </div>
+      </div>
+
     </div>
   );
 }

@@ -20,14 +20,14 @@ const GeradorDeChaves = () => {
 
   return (
     <div>
-      <h2><FaKey /> Chave</h2>
+      <span className="hdois"><FaKey className='iconTop' /> Chave</span>
       {carregando ? (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <MutatingDots
             visible={true}
             height="100"
             width="100"
-            color="#df003b95" 
+            color="#df003b95"
             secondaryColor="#df003b95"
             radius="12.5"
             ariaLabel="mutating-dots-loading"
@@ -37,15 +37,15 @@ const GeradorDeChaves = () => {
         </div>
       ) : (
         <>
-          <h5>Chave pública gerada!</h5>
+          <h5 className='hcinco'>Chave pública gerada!</h5>
           <p className='dados' style={{
-        display: '-webkit-box',
-        WebkitBoxOrient: 'vertical',
-        WebkitLineClamp: 9,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        maxHeight: 'calc(1.2em * 9)', // Ajuste conforme necessário para a altura da linha
-    }}>{chavePublica}</p>
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 9,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxHeight: 'calc(1.2em * 9)',
+          }}>{chavePublica}</p>
         </>
       )}
     </div>

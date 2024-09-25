@@ -41,7 +41,7 @@ const CertificadoDigital = () => {
 
   return (
     <div>
-      <h2><FaCertificate /> Certificado Digital</h2>
+      <span className="hdois"><FaCertificate className='iconTop'/> Certificado Digital</span>
 
       {carregando ? (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -59,7 +59,7 @@ const CertificadoDigital = () => {
         </div>
       ) : dadosCertificado ? (
         <div>
-          <h5>Certificado Existente</h5>
+          <h5 className='hcinco'>Certificado Existente</h5>
           <div className="dados">
             <div className="dados"><strong>Número de Série:</strong> {dadosCertificado.serialNumber}</div>
             <div className="dados"><strong>Emissor: </strong>JAMA Certificado Digital</div>
@@ -73,7 +73,7 @@ const CertificadoDigital = () => {
         </div>
       ) : (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <button type="submit" className="primary-btn" onClick={criarCertificado}>Criar Certificado</button>
+          <button type="submit" className="primary-butao" onClick={criarCertificado}>Criar Certificado</button>
         </div>
       )}
     </div>

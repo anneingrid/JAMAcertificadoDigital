@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import GeradorDeChaves from './components/GeradorDeChaves';
 import { AppContext } from '../src/back/Provider';
 import CertificadoDigital from './components/CertificadoDigital';
-import Assinatura from './components/Assinatura';
+import NovoArquivo from './components/NovoArquivo';
 import './App.css';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
@@ -40,8 +40,8 @@ function App() {
           element={isAuthenticated ? <CertificadoDigital /> : <Navigate to="/" />} />
 
         <Route
-          path="/Assinatura"
-          element={isAuthenticated ? <Assinatura /> : <Navigate to="/" />} />
+          path="/NovoArquivo"
+          element={isAuthenticated ? <NovoArquivo /> : <Navigate to="/" />} />
 
       </Routes>
     </Router>

@@ -1,8 +1,7 @@
-body {
+.bodi {
   font-family: "Montserrat", sans-serif;
-  background-color: #f0f2f5;
+  background-color: #f1f1f1;
   margin: 0;
-  padding: 20px;
 }
 
 h1 {
@@ -10,10 +9,17 @@ h1 {
   color: #333;
 }
 
-h2 {
+.hdois {
   display: flex;
   align-items: center;
   color: #df003b95;
+  font-size: 24px;
+  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+margin-bottom: 5px;
+}
+.iconTop{
+  margin-right: 5px;
 }
 
 h2 svg {
@@ -83,9 +89,22 @@ h2 svg {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 30%;
 }
-
-.primary-btn {
-  padding: 10px 20px;
+.card-lista{
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 46.5%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.icons{
+  margin-right: 5px;
+  font-size: 16px;
+  align-items: center;
+}
+.primary-butao {
+  padding: 10px;
   background-color: #df003b95;
   color: white;
   border: none;
@@ -95,6 +114,7 @@ h2 svg {
   margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;
+  font-size: 14px;
 }
 
 .header-container {
@@ -124,7 +144,7 @@ h1 {
   text-align: center;
 }
 
-.primary-btn-assinar {
+.primary-butao-assinar {
   padding: 10px 20px;
   background-color: #00a316;
   color: white;
@@ -137,7 +157,7 @@ h1 {
   margin-bottom: 5px;
 }
 
-.primary-btn:hover {
+.primary-butao:hover {
   background-color: #df003b95;
 }
 
@@ -154,8 +174,12 @@ strong {
 
 }
 
-h5 {
+.hcinco {
   color: #00a316;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: "Montserrat", sans-serif;
+
 }
 
 .alinharBotoes {
@@ -235,10 +259,6 @@ input {
   color: black;
 }
 
-.login-container {
-  margin-top: 15px;
-  font-size: 0.9rem;
-}
 
 .login-link {
   color: #df003b95;
@@ -252,6 +272,9 @@ input {
   align-items: center;
   height: 100vh;
   width: 100vw;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  font-family: "Montserrat", sans-serif;
 }
 
 .login-box {
@@ -294,7 +317,7 @@ input {
   border: 1px solid #ddd;
 }
 
-.login-submit {
+.login-vai {
   margin-top: 20px;
   width: 100%;
   background-color: #df003b95;

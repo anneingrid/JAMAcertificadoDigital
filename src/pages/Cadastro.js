@@ -54,7 +54,7 @@ function Cadastro() {
         <Container fluid className="cadastro-container">
             <Row>
                 <Col md={12} className="cadastro-box">
-                    <h2 className="text-center mb-4 cadastro-title">Por favor, preencha o formulário para se cadastrar!</h2>
+                    <span className="hdois" className="text-center mb-4 cadastro-title">Por favor, preencha o formulário para se cadastrar!</span>
                     {error && <Alert variant="danger">{error}</Alert>}
                     {success && <Alert variant="success">{success}</Alert>}
                     <Form onSubmit={handleSubmit}>

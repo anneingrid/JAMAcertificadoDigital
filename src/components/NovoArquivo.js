@@ -1,39 +1,15 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../back/Provider';
-import { FaFileSignature } from 'react-icons/fa';
+import { FaFile, FaSave, FaFolderOpen, FaFolderPlus } from 'react-icons/fa';
 import { supabase } from '../back/ConexaoBD';
 
-const Assinatura = () => {
-    const { usuarioLogado, assinar } = useContext(AppContext);
+const NovoArquivo = () => {
+    const { usuarioLogado} = useContext(AppContext);
     const [signature, setSignature] = useState('');
     const [conteudoArquivo, setConteudoArquivo] = useState(null);
     const [editandoNovoArquivo, setEditandoNovoArquivo] = useState(false);
     const [novoConteudo, setNovoConteudo] = useState('');
     const [arquivoParaUpload, setArquivoParaUpload] = useState(null);
-
-    const assinarDocumento = async () => {
-        try {
-            const resultado = await assinar(1, usuarioLogado.id_usuario, conteudoArquivo);
-            if (resultado) {
-                setSignature(
-                    <>
-                        <div style={{ textAlign: 'center', fontWeight: 'bold' }}>
-
-  <span style={{ color: '#00a316', fontSize:13.28 }}>✅ Assinatura gerada com sucesso!</span>
-                        </div>
-                        <div>
-                            <span style={{fontSize:14}}>🔐 Hash:</span>
-
-                        </div>
-                        <span className='dados'>{resultado}</span>
-                    </>
-                );
-            }
-        } catch (error) {
-            console.error('Erro ao assinar o documento:', error.message);
-            setSignature('Erro ao assinar o documento.');
-        }
-    };
 
     const abrirArquivo = async () => {
         try {
@@ -45,16 +21,15 @@ const Assinatura = () => {
                             'text/plain': ['.txt'],
                         },
                     },
-                    // Outros tipos de arquivo podem ser adicionados aqui
+
                 ],
                 excludeAcceptAllOption: true,
                 multiple: false,
             });
             const arquivo = await arquivoHandle.getFile();
             const textoDoArquivo = await arquivo.text();
-            setSignature(null);
             setConteudoArquivo(textoDoArquivo);
-            setArquivoParaUpload(arquivo); // Armazena o arquivo para upload
+            setArquivoParaUpload(arquivo);
             setEditandoNovoArquivo(false);
         } catch (erro) {
             console.error('Erro ao abrir o arquivo:', erro);
@@ -73,7 +48,7 @@ const Assinatura = () => {
             setConteudoArquivo(novoConteudo);
             setEditandoNovoArquivo(false);
 
-            // Cria um Blob a partir do novo conteúdo e prepara para upload
+
             const blob = new Blob([novoConteudo], { type: 'text/plain' });
             const novoArquivo = new File([blob], 'novoArquivo.txt', { type: 'text/plain' });
             setArquivoParaUpload(novoArquivo);
@@ -87,29 +62,72 @@ const Assinatura = () => {
         setNovoConteudo('');
         setConteudoArquivo(null);
         setArquivoParaUpload(null);
-        setSignature(null);
-
     };
 
-    // Função de upload para o Supabase
+
     const uploadArquivo = async () => {
         if (!arquivoParaUpload) {
             alert('Nenhum arquivo selecionado para upload.');
             return;
         }
+
         try {
+            const descricaoArquivo = conteudoArquivo ? conteudoArquivo.substring(0, 10) : 'Descrição padrão';
+            const { data: documentoData, error: dbError } = await supabase
+                .from('Documento')
+                .insert({
+                    descricao_documento: descricaoArquivo,
+                    id_usuario: usuarioLogado.id_usuario,
+                    hash_do_documento: 'sem hash por enquanto',
+                })
+                .select();
+
+            if (dbError) {
+                console.error('Erro ao salvar no banco de dados:', dbError.message);
+                alert('Erro ao salvar no banco de dados.');
+                return;
+            }
+
+            const idDocumento = documentoData[0].id_documento;
+
             const { data, error } = await supabase.storage
-                .from('documento') // Substitua pelo nome do seu bucket
-                .upload(`pasta/${arquivoParaUpload.name}`, arquivoParaUpload);
+                .from('documento')
+                .upload(`${idDocumento}.txt`, arquivoParaUpload);
 
             if (error) {
                 console.error('Erro ao fazer upload:', error.message);
                 alert('Erro ao fazer upload do arquivo.');
-            } else {
-                console.log('Upload realizado com sucesso:', data);
-                alert('Arquivo enviado com sucesso!');
+                return;
             }
-            setSignature(null);
+
+            const filePath = data.path;
+
+            const { data: publicData, error: urlError } = supabase
+                .storage
+                .from('documento')
+                .getPublicUrl(filePath);
+
+            if (urlError) {
+                console.error('Erro ao obter URL pública:', urlError.message);
+                alert('Erro ao obter a URL pública do arquivo.');
+                return;
+            }
+
+            const publicURL = publicData.publicUrl;
+
+            const { error: updateError } = await supabase
+                .from('Documento')
+                .update({
+                    urlDocumento: publicURL,
+                })
+                .eq('id_documento', idDocumento);
+
+            if (updateError) {
+                console.error('Erro ao atualizar o documento:', updateError.message);
+                alert('Erro ao atualizar o documento com a URL do arquivo.');
+            } else {
+                alert('Arquivo enviado e URL salva com sucesso!');
+            }
 
         } catch (error) {
             console.error('Erro no upload:', error.message);
@@ -117,20 +135,18 @@ const Assinatura = () => {
         }
     };
 
+
     return (
         <div>
-            <h2>
-                <FaFileSignature /> Assinar Documento
-            </h2>
+            <span className="hdois">
+                <FaFile className='iconTop' /> Novo Arquivo
+            </span>
             <div className="alinharBotoes">
-                <button onClick={abrirArquivo} className="primary-btn">
-                    Abrir Arquivo
+                <button onClick={abrirArquivo} className="primary-butao">
+                    <FaFolderOpen className='icons' />Abrir Arquivo
                 </button>
-                <button onClick={uploadArquivo} className="primary-btn">
-                    Upload Arquivo
-                </button>
-                <button onClick={criarNovoArquivo} className="primary-btn">
-                    Novo Arquivo
+                <button onClick={criarNovoArquivo} className="primary-butao">
+                    <FaFolderPlus className='icons' /> Novo Arquivo
                 </button>
             </div>
             {conteudoArquivo && (
@@ -141,39 +157,31 @@ const Assinatura = () => {
             )}
             <div className="alinharBotoes">
 
+                <button onClick={uploadArquivo} className="primary-butao">
+                    <FaSave className='icons' />Salvar
+                </button>
+            </div>
+
+            <div className="alinharBotoes">
+
                 {editandoNovoArquivo && (
                     <div>
-                        <h3>Novo Arquivo:</h3>
+                        <p>Novo Arquivo:</p>
                         <textarea
                             value={novoConteudo}
                             onChange={(e) => setNovoConteudo(e.target.value)}
                             rows={10}
                             placeholder="Digite o conteúdo do novo arquivo aqui..."
                         />
-                        <button onClick={salvarArquivo} className="primary-btn">
+                        <button onClick={salvarArquivo} className="primary-butao">
                             Salvar Arquivo
                         </button>
                     </div>
                 )}
             </div>
 
-
-            <div className="alinharBotoes">
-                <button className="primary-btn-assinar" onClick={assinarDocumento}>
-                    Assinar Documento
-                </button>
-            </div>
-
-            {signature && (
-                <div>
-                    <span style={{ marginTop: 6, display: 'block', maxWidth: '100%', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
-                        {signature}
-                    </span>
-                </div>
-            )}
-
         </div>
     );
 };
 
-export default Assinatura;
+export default NovoArquivo;

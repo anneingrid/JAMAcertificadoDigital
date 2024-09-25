@@ -268,7 +268,7 @@ export const AppProvider = ({ children }) => {
                 .select('chave_publica')
                 .eq('id_usuario', idUsuario);
 
-            if (error ) {
+            if (error) {
                 console.error('Erro ao buscar chave pública', error);
                 return null;
             }
@@ -289,17 +289,17 @@ export const AppProvider = ({ children }) => {
             if (!cert) {
                 throw new Error('Certificado não encontrado ou inválido');
             }
-    
+
             const privateKeyPem = await buscarChavePrivada(idUsuario);
             const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-            
+
             const md = forge.md.sha512.create();
             md.update(text, 'utf8');
             const signature = privateKey.sign(md);
-    
+
             const now = new Date();
             const localTime = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-    
+
             const { data, error } = await supabase
                 .from('Assinatura')
                 .insert([{
@@ -309,12 +309,12 @@ export const AppProvider = ({ children }) => {
                     assinado_em: localTime,
                     assinatura_hash: md.digest().toHex(),
                 }]);
-    
+
             if (error) {
                 console.error('Erro ao inserir a assinatura:', error.message || error);
                 return null;
             }
-    
+
             return md.digest().toHex();
         } catch (error) {
             console.error('Erro ao gerar a assinatura:', error.message || error);
@@ -332,33 +332,74 @@ export const AppProvider = ({ children }) => {
                 .select('certificado')
                 .eq('id_usuario', idUsuario)
                 .single();
-    
+
             if (usuarioError) {
                 throw new Error('Erro ao verificar usuário: ' + usuarioError.message);
             }
-    
+
             const certificadoPem = usuarioData.certificado;
             const publicKey = forge.pki.certificateFromPem(certificadoPem).publicKey;
-    
+
             // 2. Gerar hash do texto original
             const md = forge.md.sha512.create();
             md.update(textoOriginal, 'utf8');
             const hashTexto = md.digest();
-    
+
             // 3. Decodificar a assinatura em Base64
             const assinatura = forge.util.decode64(assinaturaBase64);
-    
+
             // 4. Verificar a assinatura
             const isValid = publicKey.verify(md.algorithm, hashTexto.bytes(), assinatura);
-    
+
             return isValid;
-    
+
         } catch (error) {
             console.error('Erro ao verificar a assinatura:', error.message || error);
             return false;
         }
     };
-    
+    // ----------- LISTAGEM (TIVE QUE BOTAR AQUI) --------------------
+    const [documentosNaoAssinados, setDocumentosNaoAssinados] = useState([]);
+    const [documentosAssinados, setDocumentosAssinados] = useState([]);
+
+    const fetchDocumentos = async () => {
+        const { data: documentos, error: errorDocumentos } = await supabase
+            .from('Documento')
+            .select('*');
+
+        const { data: assinaturas, error: errorAssinaturas } = await supabase
+            .from('Assinatura')
+            .select('id_documento, assinatura_hash, assinado_em');
+
+        if (errorDocumentos || errorAssinaturas) {
+            console.error('Erro ao buscar documentos ou assinaturas:', errorDocumentos?.message || errorAssinaturas?.message);
+            return;
+        }
+
+        const idsAssinados = assinaturas.map(assinatura => assinatura.id_documento);
+
+        const documentosNaoAssinados = documentos.filter(documento => !idsAssinados.includes(documento.id_documento));
+
+        const documentosAssinados = documentos
+            .filter(documento => idsAssinados.includes(documento.id_documento))
+            .map(documento => {
+                const assinatura = assinaturas.find(a => a.id_documento === documento.id_documento);
+                return {
+                    ...documento,         
+                    assinaturaHash: assinatura.assinatura_hash,
+                    assinadoEm: assinatura.assinado_em
+                };
+            });
+
+        setDocumentosNaoAssinados(documentosNaoAssinados);
+        setDocumentosAssinados(documentosAssinados);
+    };
+
+    useEffect(() => {
+        fetchDocumentos();
+    }, []);
+
+
     return (
         <AppContext.Provider value={{
             cadastrarUsuario,
@@ -368,7 +409,10 @@ export const AppProvider = ({ children }) => {
             certificado,
             buscarChavePublica,
             buscarUsuarioPorId,
-            assinar
+            assinar,
+            documentosNaoAssinados,
+            documentosAssinados,
+            fetchDocumentos
         }}>
             {children}
         </AppContext.Provider>

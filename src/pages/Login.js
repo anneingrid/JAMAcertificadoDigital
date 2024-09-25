@@ -31,9 +31,9 @@ function Login({ setIsAuthenticated }) {
         <Container fluid className="login-container">
             <Row className="justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
                 <Col md={12} className="login-box">
-                    <h2 className="text-center mb-4 login-title">
+                    <span className="hdois text-center mb-4 login-title">
                         <img src="/logo.png" alt="JAMA Certificado" className="login-image" />
-                    </h2>
+                    </span>
                     <div className="logo">
                         <span className="jama-text-logo">JAMA</span><br />
                         <span className="certificado-text-logo">Certificado Digital</span>
@@ -63,9 +63,9 @@ function Login({ setIsAuthenticated }) {
                             />
                         </Form.Group>
 
-                        <Button type="submit" className="login-submit">
+                        <button type="submit" className="login-vai">
                             Entrar
-                        </Button>
+                        </button>
                     </Form>
 
                     <div className="register-container">
