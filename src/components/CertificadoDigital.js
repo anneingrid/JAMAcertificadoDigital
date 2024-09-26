@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { FaCertificate } from 'react-icons/fa';
 import { AppContext } from '../back/Provider';
-import { MutatingDots } from 'react-loader-spinner';
 
 const CertificadoDigital = () => {
   const { usuarioLogado, certificado, buscarUsuarioPorId } = useContext(AppContext);
@@ -44,18 +43,15 @@ const CertificadoDigital = () => {
       <span className="hdois"><FaCertificate className='iconTop'/> Certificado Digital</span>
 
       {carregandu ? (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <MutatingDots
-            visible={true}
-            height="100"
-            width="100"
-            color="#df003b95"
-            secondaryColor="#df003b95"
-            radius="12.5"
-            ariaLabel="mutating-dots-loading"
-            wrapperStyle={{}}
-            wrapperClass=""
-          />
+        <div className="placeholder-glow" style={{ margin: '20px 0', padding: '10px' }}>
+          <p className="placeholder col-12" style={{ height: '16px' }}></p>
+          <p className="placeholder col-11" style={{ height: '16px' }}></p>
+          <p className="placeholder col-8" style={{ height: '16px' }}></p>
+          <p className="placeholder col-6" style={{ height: '16px' }}></p>
+          <p className="placeholder col-6" style={{ height: '16px' }}></p>
+          <p className="placeholder col-6" style={{ height: '16px' }}></p>
+          <p className="placeholder col-7" style={{ height: '16px' }}></p>
+          <p className="placeholder col-7" style={{ height: '16px' }}></p>
         </div>
       ) : dadosCertificado ? (
         <div>

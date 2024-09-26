@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { FaKey } from 'react-icons/fa';
 import { AppContext } from '../back/Provider';
-import { MutatingDots } from 'react-loader-spinner';
 
 const GeradorDeChaves = () => {
   const { usuarioLogado, buscarChavePublica } = useContext(AppContext);
@@ -22,18 +21,12 @@ const GeradorDeChaves = () => {
     <div>
       <span className="hdois"><FaKey className='iconTop' /> Chave</span>
       {carregando ? (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <MutatingDots
-            visible={true}
-            height="100"
-            width="100"
-            color="#df003b95"
-            secondaryColor="#df003b95"
-            radius="12.5"
-            ariaLabel="mutating-dots-loading"
-            wrapperStyle={{}}
-            wrapperClass=""
-          />
+        <div className="placeholder-glow" style={{ margin: '20px 0', padding: '10px' }}>
+          <p className="placeholder col-8" style={{ height: '16px' }}></p>
+          <p className="placeholder col-10" style={{ height: '16px' }}></p>
+          <p className="placeholder col-12" style={{ height: '16px' }}></p>
+          <p className="placeholder col-12" style={{ height: '16px' }}></p>
+          <p className="placeholder col-12" style={{ height: '16px' }}></p>
         </div>
       ) : (
         <>
