@@ -135,6 +135,8 @@ const NovoArquivo = () => {
                 setToastMessage('✅Arquivo enviado e URL salva com sucesso!');
                 setShowToast(true);
                 fetchDocumentos();
+                setArquivoParaUpload(null);
+                setConteudoArquivo(null);
 
             }
 
