@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../back/Provider';
 
@@ -12,6 +12,7 @@ function Cadastro() {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false); // Novo estado de carregamento
     const navigate = useNavigate();
     const { cadastrarUsuario } = useContext(AppContext);
 
@@ -27,18 +28,22 @@ function Cadastro() {
         e.preventDefault();
         setError('');
         setSuccess('');
+        setLoading(true); // Começa o carregamento
 
         if (formData.senha !== formData.confirmarSenha) {
             setError('As senhas não coincidem.');
+            setLoading(false); // Para o carregamento
             return;
         }
 
         if (formData.senha.length < 6) {
             setError('A senha deve ter pelo menos 6 caracteres.');
+            setLoading(false); // Para o carregamento
             return;
         }
 
         const result = await cadastrarUsuario(formData.nome, formData.email, formData.senha);
+        setLoading(false); // Para o carregamento
 
         if (result.error) {
             setError(result.error);
@@ -54,7 +59,7 @@ function Cadastro() {
         <Container fluid className="cadastro-container">
             <Row>
                 <Col md={12} className="cadastro-box">
-                    <span className="hdois" className="text-center mb-4 cadastro-title">Por favor, preencha o formulário para se cadastrar!</span>
+                    <span className="hdois text-center mb-4 cadastro-title">Por favor, preencha o formulário para se cadastrar!</span>
                     {error && <Alert variant="danger">{error}</Alert>}
                     {success && <Alert variant="success">{success}</Alert>}
                     <Form onSubmit={handleSubmit}>
@@ -106,9 +111,15 @@ function Cadastro() {
                             />
                         </Form.Group>
 
-                        <Button type="submit" className="cadastro-submit">
-                            Cadastrar
-                        </Button>
+                        <button type="submit" className="cadastro-submit" disabled={loading}>
+                            {loading ? (
+                                <>
+                                    <Spinner animation="border" size="sm" /> Carregando...
+                                </>
+                            ) : (
+                                'Cadastrar'
+                            )}
+                        </button>
 
                         <div className="cadastro-entrar">
                             <span>Já tem uma conta? </span>

@@ -87,8 +87,8 @@ const ListaDocumentos = () => {
                             <Accordion.Body>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
-                                        <div className="dados"><strong>Id do Documento:</strong> {documento.id_documento}</div>
-                                        <div className="dados"><strong>Id do Propietário:</strong> {documento.id_usuario}</div>
+                                        <div className="dados"><strong>Id:</strong> {documento.id_documento}</div>
+                                        <div className="dados"><strong>Usuário:</strong> {documento.Usuario.nome_usuario}</div>
                                         <div className="dados"><strong>URL documento:</strong> <a href={documento.urlDocumento} target="_blank" rel="noopener noreferrer">
                                             <span>Abrir arquivo</span>
                                         </a></div>

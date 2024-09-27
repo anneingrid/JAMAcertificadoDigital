@@ -32,7 +32,7 @@ const ListaDocumentosAssinados = () => {
             setShowToast(true);
         }
     };
-
+    console.log(documentosAssinados[0]);
     return (
         <div>
 
@@ -92,7 +92,7 @@ const ListaDocumentosAssinados = () => {
                                             }}>
                                                 <strong>Hash Assinatura:</strong> {documento.assinaturaHash.substring(0, 20)}...
                                             </div>
-                                            <div className="dados"><strong>Assinado por:</strong> {documento.id_usuario}</div>
+                                            <div className="dados"><strong>Assinado por:</strong> {documento.Usuario.nome_usuario}</div>
 
 
                                             <div className="dados"><strong>URL documento:</strong> <a href={documento.urlDocumento} target="_blank" rel="noopener noreferrer">

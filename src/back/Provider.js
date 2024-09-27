@@ -58,8 +58,6 @@ export const AppProvider = ({ children }) => {
                 return { error: 'Erro ao cadastrar o usuário. Tente novamente.' };
             }
 
-            console.log(novoUsuario.id_usuario);
-
             // ----------- GERAR E ARMAZENAR CHAVES --------------------
             const chaves = await gerarChaves(novoUsuario.id_usuario);
             if (!chaves) {
@@ -127,11 +125,12 @@ export const AppProvider = ({ children }) => {
             const { data: dados, error: erro } = await supabase.storage
                 .from('chave')
                 .upload(`${idUsuario}.pem`, chave_priv);
-                if (erro) {
-                    console.error('Erro ao obter URL pública:', erro.message);
-                    alert('Erro ao obter a URL pública do arquivo.');
-                    return null;
-                }
+
+            if (erro) {
+                console.error('Erro ao obter URL pública:', erro.message);
+                alert('Erro ao obter a URL pública do arquivo.');
+                return null;
+            }
 
             const caminho = dados.path;
 
@@ -171,9 +170,10 @@ export const AppProvider = ({ children }) => {
         try {
             const { data: usuarioData, error: usuarioError } = await supabase
                 .from('Usuario')
-                .select('certificado, certificadoDados')
+                .select('certificado')
                 .eq('id_usuario', idUsuario)
                 .single();
+
             if (usuarioError) {
                 throw new Error('Erro ao verificar usuário:' + usuarioError.message);
             }
@@ -224,10 +224,37 @@ export const AppProvider = ({ children }) => {
                 }
             };
 
+            //---- SALVAR O .PEMMMMM------
+
+            const { data: dados, error: erro } = await supabase.storage
+                .from('certificado')
+                .upload(`${idUsuario}.pem`, pemCert);
+
+            if (erro) {
+                console.error('Erro ao obter URL pública:', erro.message);
+                alert('Erro ao obter a URL pública do arquivo.');
+                return null;
+            }
+
+            const caminho = dados.path;
+
+            const { data: publicData, error: urlError } = supabase
+                .storage
+                .from('certificado')
+                .getPublicUrl(caminho);
+
+            if (urlError) {
+                console.error('Erro ao obter URL pública:', urlError.message);
+                alert('Erro ao obter a URL pública do arquivo.');
+                return null;
+            }
+
+            const linkCert = publicData.publicUrl;
+
             //---- SALVAR ISSO NO BANCO EM NOME DE JESUS ------
             const { data, error } = await supabase
                 .from('Usuario')
-                .update({ certificado: pemCert, certificadoDados: dadosCertificado })
+                .update({ certificado: pemCert, certificadoDados: dadosCertificado, link_certificado: linkCert })
                 .eq('id_usuario', idUsuario);
 
             if (error) {
@@ -390,7 +417,13 @@ export const AppProvider = ({ children }) => {
     const fetchDocumentos = async () => {
         const { data: documentos, error: errorDocumentos } = await supabase
             .from('Documento')
-            .select('*');
+            .select(`
+        *,
+        Usuario (
+            id_usuario,
+            nome_usuario
+        )
+    `);
 
         const { data: assinaturas, error: errorAssinaturas } = await supabase
             .from('Assinatura')
@@ -422,7 +455,7 @@ export const AppProvider = ({ children }) => {
 
     useEffect(() => {
         fetchDocumentos();
-    }, []);
+    }, [usuarioLogado]);
 
 
 

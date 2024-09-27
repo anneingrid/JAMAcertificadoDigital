@@ -50,8 +50,6 @@ const CertificadoDigital = () => {
           <p className="placeholder col-6" style={{ height: '16px' }}></p>
           <p className="placeholder col-6" style={{ height: '16px' }}></p>
           <p className="placeholder col-6" style={{ height: '16px' }}></p>
-          <p className="placeholder col-7" style={{ height: '16px' }}></p>
-          <p className="placeholder col-7" style={{ height: '16px' }}></p>
         </div>
       ) : dadosCertificado ? (
         <div>

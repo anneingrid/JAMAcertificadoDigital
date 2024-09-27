@@ -14,6 +14,13 @@ const NovoArquivo = () => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [carregando, setCarregando] = useState(false);
+    const forge = require('node-forge');
+
+    function gerarHash(dados) {
+        const md = forge.md.sha256.create();
+        md.update(dados, 'utf8');
+        return md.digest().toHex();
+    }
 
     const abrirArquivo = async () => {
         try {
@@ -78,13 +85,14 @@ const NovoArquivo = () => {
         }
         setCarregando(true);
         try {
+            const hashGerado = gerarHash(conteudoArquivo);
             const descricaoArquivo = conteudoArquivo ? conteudoArquivo.substring(0, 10) : 'Descrição padrão';
             const { data: documentoData, error: dbError } = await supabase
                 .from('Documento')
                 .insert({
                     descricao_documento: descricaoArquivo,
                     id_usuario: usuarioLogado.id_usuario,
-                    hash_do_documento: 'sem hash por enquanto',
+                    hash_do_documento: hashGerado,
                 })
                 .select();
 
@@ -144,7 +152,7 @@ const NovoArquivo = () => {
             console.error('Erro no upload:', error.message);
             alert('Erro no upload do arquivo.');
         } finally {
-            setCarregando(false)
+            setCarregando(false);
         }
     };
 
