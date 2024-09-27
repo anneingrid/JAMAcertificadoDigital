@@ -6,24 +6,31 @@ import { AppContext } from '../back/Provider';
 import { Oval, ThreeDots } from 'react-loader-spinner';
 
 const ListaDocumentosAssinados = () => {
-    const { documentosAssinados } = useContext(AppContext);
+    const { documentosAssinados, extrairChavePublica, obterCertificado, usuarioLogado, verificarAssinatura4 } = useContext(AppContext);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [carregando, setCarregando] = useState(false);
-    const [buscando, setBuscando] = useState(true);
+    const [buscando, setBuscando] = useState(true);   
 
     useEffect(() => {
         if (documentosAssinados) {
             setBuscando(false);
         }
+
     }, [documentosAssinados]);
 
-    const verificar = async () => {
-        setCarregando(true);
 
+    const verificar = async (documento, assinatura) => {
+        setCarregando(true);
         try {
-            // só pra fazer uma firula
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const certificado = await obterCertificado(usuarioLogado.id_usuario);
+            console.log(certificado);
+            const chavePublica = await extrairChavePublica(certificado);
+            console.log(chavePublica);
+            console.log(assinatura);
+            const resultado = verificarAssinatura4(documento, assinatura, chavePublica);
+            console.log(resultado)
+
         } catch (erro) {
 
         } finally {
@@ -102,7 +109,7 @@ const ListaDocumentosAssinados = () => {
 
                                         <div>
 
-                                            <button className='primary-butao' onClick={verificar}>
+                                        <button className='primary-butao' onClick={() => verificar(documento.descricao_documento, documento.assinatura)}> 
                                                 {carregando ? (
                                                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                                                         <ThreeDots
