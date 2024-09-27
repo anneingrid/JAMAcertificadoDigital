@@ -23,7 +23,6 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
     };
 
-
     // ----------- CADASTRO USUÁRIO --------------------
     const cadastrarUsuario = async (nome, email, senha) => {
         try {
@@ -54,22 +53,21 @@ export const AppProvider = ({ children }) => {
                 .select('*')
                 .single();
 
-            console.log(novoUsuario.id_usuario)
-
             if (error) {
                 console.error('Erro ao cadastrar o usuário:', error.message || error);
                 return { error: 'Erro ao cadastrar o usuário. Tente novamente.' };
             }
+
+            console.log(novoUsuario.id_usuario);
+
             // ----------- GERAR E ARMAZENAR CHAVES --------------------
             const chaves = await gerarChaves(novoUsuario.id_usuario);
-
-
             if (!chaves) {
-                console.error('Erro ao armazenar as chaves:');
+                console.error('Erro ao gerar e armazenar as chaves');
                 return { error: 'Erro ao gerar e armazenar as chaves. Tente novamente.' };
             }
 
-            return { success: 'Usuário cadastrado com sucesso e chaves geradas!' };
+            return true;
         } catch (error) {
             console.error('Erro no processo de cadastro:', error.message || error);
             return { error: 'Erro no processo de cadastro. Tente novamente.' };
@@ -126,19 +124,46 @@ export const AppProvider = ({ children }) => {
             const chave_priv = forge.pki.privateKeyToPem(keyPair.privateKey);
             const chave_publ = forge.pki.publicKeyToPem(keyPair.publicKey);
 
+            const { data: dados, error: erro } = await supabase.storage
+                .from('chave')
+                .upload(`${idUsuario}.pem`, chave_priv);
+                if (erro) {
+                    console.error('Erro ao obter URL pública:', erro.message);
+                    alert('Erro ao obter a URL pública do arquivo.');
+                    return null;
+                }
+
+            const caminho = dados.path;
+
+            const { data: publicData, error: urlError } = supabase
+                .storage
+                .from('chave')
+                .getPublicUrl(caminho);
+
+            if (urlError) {
+                console.error('Erro ao obter URL pública:', urlError.message);
+                alert('Erro ao obter a URL pública do arquivo.');
+                return null;
+            }
+
+            const publicURL = publicData.publicUrl;
+
             const { data, error } = await supabase
                 .from('Usuario')
-                .update({ chave_publica: chave_publ, chave_privada: chave_priv })
-                .match({ id_usuario: idUsuario });
+                .update({ chave_publica: chave_publ, chave_privada: chave_priv, link_chave_privada: publicURL, })
+                .match({ id_usuario: idUsuario })
+                .select('*');
+
             if (error) {
                 console.error("Erro:", error.message || error);
                 return null;
             }
-            return 'cadastrado';
+            return data;
         } catch (error) {
             console.error('Erro ao gerar o par de chaves:', error.message || error);
             return null;
         }
+
     };
 
     // ----------- GERAR CERTIFICADO --------------------
@@ -385,7 +410,7 @@ export const AppProvider = ({ children }) => {
             .map(documento => {
                 const assinatura = assinaturas.find(a => a.id_documento === documento.id_documento);
                 return {
-                    ...documento,         
+                    ...documento,
                     assinaturaHash: assinatura.assinatura_hash,
                     assinadoEm: assinatura.assinado_em
                 };
@@ -398,6 +423,8 @@ export const AppProvider = ({ children }) => {
     useEffect(() => {
         fetchDocumentos();
     }, []);
+
+
 
 
     return (
