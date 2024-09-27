@@ -28,9 +28,9 @@ function Login({ setIsAuthenticated }) {
     };
 
     return (
-        <Container fluid className="login-container">
-            <Row className="justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-                <Col md={12} className="login-box">
+        <div fluid className="login-container">
+            <div className="justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+                <div md={12} className="login-box">
                     <span className="hdois text-center mb-4 login-title">
                         <img src="logo.png" alt="JAMA Certificado" className="login-image" />
                     </span>
@@ -72,9 +72,9 @@ function Login({ setIsAuthenticated }) {
                         <span>Não tem uma conta? </span>
                         <Link to="/Cadastro" className="register-link">Registre-se</Link>
                     </div>
-                </Col>
-            </Row>
-        </Container>
+                </div>
+            </div>
+        </div>
     );
 }
 

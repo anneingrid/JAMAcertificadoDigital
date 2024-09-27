@@ -76,7 +76,6 @@ const ListaDocumentos = () => {
                             eventKey={documento.id_documento}
                             key={documento.id_documento}
                             style={{
-                                borderBottom: '1px solid lightgray',
                                 padding: '10px',
                                 marginBottom: '10px',
                             }}

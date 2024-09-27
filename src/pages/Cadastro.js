@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Form, Button, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Alert, Spinner, Toast } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../back/Provider';
 
@@ -12,7 +12,8 @@ function Cadastro() {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(false); // Novo estado de carregamento
+    const [loading, setLoading] = useState(false);
+    const [showToast, setShowToast] = useState(false);
     const navigate = useNavigate();
     const { cadastrarUsuario } = useContext(AppContext);
 
@@ -28,30 +29,32 @@ function Cadastro() {
         e.preventDefault();
         setError('');
         setSuccess('');
-        setLoading(true); // Começa o carregamento
+        setLoading(true);
 
         if (formData.senha !== formData.confirmarSenha) {
             setError('As senhas não coincidem.');
-            setLoading(false); // Para o carregamento
+            setLoading(false);
             return;
         }
 
         if (formData.senha.length < 6) {
             setError('A senha deve ter pelo menos 6 caracteres.');
-            setLoading(false); // Para o carregamento
+            setLoading(false);
             return;
         }
 
-        const result = await cadastrarUsuario(formData.nome, formData.email, formData.senha);
-        setLoading(false); // Para o carregamento
-
-        if (result.error) {
-            setError(result.error);
-        } else {
+        try {
+            const result = await cadastrarUsuario(formData.nome, formData.email, formData.senha);
             setSuccess(result.success);
+        } catch {
+            setError('Ocorreu um erro ao cadastrar o usuário. Tente novamente.');
+        } finally {
+
+            setShowToast(true);
             setTimeout(() => {
                 navigate('/');
             }, 3000);
+            setLoading(false); // Garante que o estado de carregamento é atualizado
         }
     };
 
@@ -128,6 +131,24 @@ function Cadastro() {
                     </Form>
                 </Col>
             </Row>
+
+            <Toast
+                onClose={() => setShowToast(false)}
+                show={showToast}
+                delay={3000}
+                autohide
+                style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    minWidth: '400px',
+                    textAlign: 'center',
+                    zIndex: 9999
+                }}
+            >
+                <Toast.Body>Cadastro realizado com sucesso! Você será redirecionado para o login.</Toast.Body>
+            </Toast>
         </Container>
     );
 }
