@@ -8,6 +8,7 @@ import './App.css';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import Principal from './pages/Principal';
+import ListarArquivos from './pages/ListarArquivos';
 
 
 function App() {
@@ -42,6 +43,10 @@ function App() {
         <Route
           path="/NovoArquivo"
           element={isAuthenticated ? <NovoArquivo /> : <Navigate to="/" />} />
+
+        <Route
+          path="/ListarArquivos"
+          element={isAuthenticated ? <ListarArquivos /> : <Navigate to="/ListarArquivos" />} />
 
       </Routes>
     </Router>

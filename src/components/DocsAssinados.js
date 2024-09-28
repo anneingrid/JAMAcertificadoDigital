@@ -5,22 +5,31 @@ import { FaEye, FaFileContract } from 'react-icons/fa';
 import { AppContext } from '../back/Provider';
 
 const ListaDocumentosAssinados = () => {
-    const { documentosAssinados } = useContext(AppContext);
+    const { documentosAssinados, extrairChavePublica, obterCertificado, usuarioLogado, verificarAssinatura4 } = useContext(AppContext);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [carregando, setCarregando] = useState(false);
-    const [buscando, setBuscando] = useState(true);
+    const [buscando, setBuscando] = useState(true);   
 
     useEffect(() => {
         if (documentosAssinados) {
             setBuscando(false);
         }
+
     }, [documentosAssinados]);
 
-    const verificar = async () => {
+
+    const verificar = async (documento, assinatura) => {
         setCarregando(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const certificado = await obterCertificado(usuarioLogado.id_usuario);
+            console.log(certificado);
+            const chavePublica = await extrairChavePublica(certificado);
+            console.log(chavePublica);
+            console.log(assinatura);
+            const resultado = verificarAssinatura4(documento, assinatura, chavePublica);
+            console.log(resultado)
+
         } catch (erro) {
             console.error(erro);
         } finally {
@@ -75,8 +84,38 @@ const ListaDocumentosAssinados = () => {
                                             }}>
                                                 <strong>Hash Assinatura:</strong> {documento.assinaturaHash.substring(0, 20)}...
                                             </div>
-                                            <div className="dados"><strong>Assinado por:</strong> {documento.Usuario.nome_usuario}</div>
-                                            <div className="dados"><strong>URL documento:</strong> <a href={documento.urlDocumento} target="_blank" rel="noopener noreferrer">Abrir arquivo</a></div>
+                                            <div className="dados"><strong>Assinado por:</strong> {documento.id_usuario}</div>
+
+
+                                            <div className="dados"><strong>URL documento:</strong> <a href={documento.urlDocumento} target="_blank" rel="noopener noreferrer">
+                                                <span>Abrir arquivo</span>
+                                            </a></div>
+                                        </div>
+
+                                        <div>
+
+                                        <button className='primary-butao' onClick={() => verificar(documento.descricao_documento, documento.assinatura)}> 
+                                                {carregando ? (
+                                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                        <ThreeDots
+                                                            visible={true}
+                                                            height="25"
+                                                            width="25"
+                                                            color="white"
+                                                            secondaryColor="#df003b95"
+                                                            radius="9"
+                                                            ariaLabel="three-dots-loading"
+                                                            wrapperStyle={{}}
+                                                            wrapperClass=""
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <FaEye className='icons' />Verificar
+
+                                                    </>
+                                                )}
+                                            </button>
                                         </div>
                                         <button className='primary-butao' onClick={verificar}>
                                             {carregando ? (

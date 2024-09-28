@@ -327,17 +327,19 @@ export const AppProvider = ({ children }) => {
                 .eq('id_usuario', idUsuario);
 
             if (error) {
-                console.error('Erro ao buscar chave pública', error);
-                return null;
-            }
+                if (error) {
+                    console.error('Erro ao buscar chave pública', error);
+                    return null;
+                }
 
-            const publicKey = (data[0].chave_publica);
-            return publicKey;
+                const publicKey = (data[0].chave_publica);
+                return publicKey;
+            }
         } catch (error) {
             console.error('Erro ao importar chave pública', error.message || error);
             return null;
         }
-    };
+    }
 
     // ----------- ASSINAR --------------------
     const assinar = async (idDocumento, idUsuario, text) => {
@@ -381,7 +383,6 @@ export const AppProvider = ({ children }) => {
     };
 
     // ----------- VERIFICAR ASSINATURA --------------------
-
     const verificarAssinatura = async (idUsuario, textoOriginal, assinaturaBase64) => {
         try {
             // 1. Obter o certificado do usuário
@@ -416,6 +417,7 @@ export const AppProvider = ({ children }) => {
             return false;
         }
     };
+
     // ----------- LISTAGEM (TIVE QUE BOTAR AQUI) --------------------
     const [documentosNaoAssinados, setDocumentosNaoAssinados] = useState([]);
     const [documentosAssinados, setDocumentosAssinados] = useState([]);
@@ -433,7 +435,7 @@ export const AppProvider = ({ children }) => {
 
         const { data: assinaturas, error: errorAssinaturas } = await supabase
             .from('Assinatura')
-            .select('id_documento, assinatura_hash, assinado_em');
+            .select('id_documento, assinatura_hash, assinado_em, assinatura');
 
         if (errorDocumentos || errorAssinaturas) {
             console.error('Erro ao buscar documentos ou assinaturas:', errorDocumentos?.message || errorAssinaturas?.message);
@@ -451,12 +453,14 @@ export const AppProvider = ({ children }) => {
                 return {
                     ...documento,
                     assinaturaHash: assinatura.assinatura_hash,
-                    assinadoEm: assinatura.assinado_em
+                    assinadoEm: assinatura.assinado_em,
+                    assinatura:assinatura.assinatura
                 };
             });
 
         setDocumentosNaoAssinados(documentosNaoAssinados);
         setDocumentosAssinados(documentosAssinados);
+        console.log(documentosAssinados)
     };
 
     useEffect(() => {
@@ -464,6 +468,50 @@ export const AppProvider = ({ children }) => {
     }, [usuarioLogado]);
 
 
+
+
+    // ----------- VERIFICAR ASSINATURA --------------------
+    const obterCertificado = async (idUsuario) => {
+        const { data, error } = await supabase
+            .from('Usuario')
+            .select('certificado')
+            .eq('id_usuario', idUsuario)
+
+        if (error) {
+            throw new Error('Erro ao obter certificado: ' + error.message);
+        }
+
+        return data[0].certificado;
+    };
+
+    const extrairChavePublica = async (certificado) => {
+        try {
+            const pegaCertificado = forge.pki.certificateFromPem(certificado);
+            const chavePublica = pegaCertificado.publicKey;
+            return chavePublica;
+        } catch (error) {
+            console.error('Erro ao extrair chave pública:', error);
+        }
+    };
+
+    function verificarAssinatura4(documento, assinaturaBase64, chavePublica) {
+        try {
+            // Cria o hash do documento usando SHA-256
+            const md = forge.md.sha256.create();
+            md.update(documento, 'utf8');  // Documento original que foi assinado
+    
+            // Decodifica a assinatura de Base64 para bytes
+            const assinatura = forge.util.decode64(assinaturaBase64);
+    
+            // Verifica a assinatura com a chave pública
+            const isValid = chavePublica.verify(md.digest().bytes(), assinatura);
+            console.log(isValid)
+            return isValid;
+        } catch (error) {
+            console.error('Erro ao verificar a assinatura:', error);
+            return false;
+        }
+    }
 
 
     return (
@@ -476,12 +524,15 @@ export const AppProvider = ({ children }) => {
             buscarChavePublica,
             buscarUsuarioPorId,
             assinar,
+            obterCertificado,
+            extrairChavePublica,
+            assinar,
             documentosNaoAssinados,
             documentosAssinados,
-            fetchDocumentos
+            fetchDocumentos,
+            verificarAssinatura4
         }}>
             {children}
         </AppContext.Provider>
     );
-};
-
+}
