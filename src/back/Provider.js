@@ -9,21 +9,8 @@ export const AppProvider = ({ children }) => {
     const forge = require('node-forge');
 
     // ----------- USUÁRIO LOGADO--------------------
-    const [usuarioLogado, setUsuarioLogado] = useState(null);
-    useEffect(() => {
-        const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
-
-        if (usuario) {
-            setUsuarioLogado(usuario);
-        }
-    }, []);
-
-
-    const salvarUsuarioNoLocalStorage = (usuario) => {
-        localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
-    };
-
-
+     const [usuarioLogado, setUsuarioLogado] = useState(null);
+     
     // ----------- CADASTRO USUÁRIO --------------------
     const cadastrarUsuario = async (nome, email, senha) => {
         try {
@@ -92,7 +79,6 @@ export const AppProvider = ({ children }) => {
                 .single();
 
             if (fetchError || !usuario) {
-                localStorage.removeItem('usuarioLogado');
                 return { error: 'Usuário não encontrado.' };
             }
 
@@ -103,12 +89,9 @@ export const AppProvider = ({ children }) => {
             }
 
             setUsuarioLogado(usuario);
-            salvarUsuarioNoLocalStorage(usuario);
-
             return { success: true, usuario };
         } catch (error) {
             console.error('Erro durante o login:', error.message || error);
-            localStorage.removeItem('usuarioLogado');
             return { error: 'Erro durante o login. Tente novamente.' };
         }
     };
@@ -116,8 +99,8 @@ export const AppProvider = ({ children }) => {
     // ----------- LOGOUT --------------------
     const logout = () => {
         setUsuarioLogado(null);
-        localStorage.removeItem('usuarioLogado');
-    };
+
+    }
 
     // ----------- GERAR CHAVES --------------------
     const gerarChaves = async (idUsuario) => {
