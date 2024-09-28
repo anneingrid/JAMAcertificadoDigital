@@ -55,7 +55,6 @@ const CertificadoDigital = () => {
         </div>
       ) : dadosCertificado ? (
         <div>
-          <h5 className='hcinco' style={{ color: '#4a4a4a', marginBottom: '10px' }}>Certificado Existente</h5>
           <div className="dados" style={{ backgroundColor: '#f8f9fa', padding: '10px', borderRadius: '8px' }}>
             <div className="dados" ><strong>Número de Série:</strong> {dadosCertificado.serialNumber}</div>
             <div className="dados" ><strong>Emissor: </strong>JAMA Certificado Digital</div>

@@ -9,7 +9,7 @@ const ListaDocumentosAssinados = () => {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [carregando, setCarregando] = useState(false);
-    const [buscando, setBuscando] = useState(true);   
+    const [buscando, setBuscando] = useState(true);
 
     useEffect(() => {
         if (documentosAssinados) {
@@ -19,23 +19,25 @@ const ListaDocumentosAssinados = () => {
     }, [documentosAssinados]);
 
 
-    const verificar = async (documento, assinatura) => {
+    const verificar = async (idDocumento, documento) => {
         setCarregando(true);
         try {
             const certificado = await obterCertificado(usuarioLogado.id_usuario);
-            console.log(certificado);
             const chavePublica = await extrairChavePublica(certificado);
-            console.log(chavePublica);
-            console.log(assinatura);
-            const resultado = verificarAssinatura4(documento, assinatura, chavePublica);
+            const resultado = verificarAssinatura4(idDocumento, documento, chavePublica);
             console.log(resultado)
+            if (resultado) {
+                setToastMessage('✅Assinatura válida!');
+                setShowToast(true);
 
+            } else {
+                setToastMessage('❌ Erro: Assinatura inválida!');
+                setShowToast(true);
+            }
         } catch (erro) {
             console.error(erro);
         } finally {
             setCarregando(false);
-            setToastMessage('👀 Assinatura verificada!');
-            setShowToast(true);
         }
     };
 
@@ -92,32 +94,12 @@ const ListaDocumentosAssinados = () => {
                                             </a></div>
                                         </div>
 
-                                        <div>
 
-                                        <button className='primary-butao' onClick={() => verificar(documento.descricao_documento, documento.assinatura)}> 
-                                                {carregando ? (
-                                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                                        <ThreeDots
-                                                            visible={true}
-                                                            height="25"
-                                                            width="25"
-                                                            color="white"
-                                                            secondaryColor="#df003b95"
-                                                            radius="9"
-                                                            ariaLabel="three-dots-loading"
-                                                            wrapperStyle={{}}
-                                                            wrapperClass=""
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <FaEye className='icons' />Verificar
 
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                        <button className='primary-butao' onClick={verificar}>
+                                        <button className='primary-butao'
+                                            onClick={() => verificar(documento.id_documento,documento.descricao_documento)}
+
+                                        >
                                             {carregando ? (
                                                 <div className="d-flex align-items-center">
                                                     <Spinner animation="border" size="sm" />

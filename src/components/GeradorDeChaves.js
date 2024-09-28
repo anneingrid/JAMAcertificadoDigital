@@ -4,7 +4,7 @@ import { AppContext } from '../back/Provider';
 import { Accordion, Toast, Placeholder, Spinner } from 'react-bootstrap';
 
 const GeradorDeChaves = () => {
-  const { usuarioLogado, buscarChavePublica } = useContext(AppContext);
+  const { usuarioLogado, buscarChavePublica} = useContext(AppContext);
   const [chavePublica, setChavePublica] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [showToast, setShowToast] = useState(false);
@@ -27,7 +27,7 @@ const GeradorDeChaves = () => {
   return (
     <div >
       <span className="hdois" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-        <FaKey className='iconTop' /> Chave
+        <FaKey className='iconTop' /> Chave Pública
       </span>
 
       {carregando ? (
@@ -40,7 +40,6 @@ const GeradorDeChaves = () => {
         </div>
       ) : (
         <>
-          <h5 className='hcinco' style={{ color: '#4a4a4a', marginBottom: '15px' }}>Chave pública gerada!</h5>
           <div style={{ position: 'relative', marginBottom: '20px' }}>
             <p className='dados' style={{
               display: '-webkit-box',

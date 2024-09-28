@@ -10,41 +10,41 @@ h1 {
   color: #333;
 }
 .header-wrapper {
-  padding: 20px; /* Espaçamento interno */
-  background-color: #f9f9f9; /* Cor de fundo suave */
-  border-radius: 8px; /* Cantos arredondados */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-  text-align: center; /* Centraliza todo o texto */
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .logo-container {
-  margin-top: 10px; /* Espaçamento inferior */
+  margin-top: 10px;
 }
 
 .jama-text {
-  font-size: 24px; /* Tamanho da fonte para o nome */
-  font-weight: bold; /* Negrito para destaque */
+  font-size: 24px;
+  font-weight: bold;
   color: #df003b95; 
-  margin-bottom: 25px;/* Cor do texto */
+  margin-bottom: 25px;
 }
 
 .certificado-text {
-  font-size: 16px; /* Tamanho da fonte para o subtítulo */
+  font-size: 16px;
   color: #555; 
-  /* Cor do texto mais clara */
+ 
 }
 
 .divider {
-  width: 80%; /* Largura da divisória */
-  height: 2px; /* Altura da divisória */
-  background-color: #d3d3d3; /* Cor da divisória */
-  margin: 0 auto; /* Centraliza a divisória */
+  width: 80%;
+  height: 2px;
+  background-color: #d3d3d3;
+  margin: 0 auto;
 }
 
 .title-nome {
-  font-size: 20px; /* Tamanho da fonte do título */
-  margin-bottom: 12px; /* Espaçamento inferior */
-  color: #444; /* Cor do título */
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #444;
 }
 
 
@@ -145,8 +145,7 @@ h2 svg {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  margin: 0 20px;
+  margin: 0 0px;
 }
 
 .primary {

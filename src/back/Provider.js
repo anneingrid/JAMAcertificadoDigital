@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { supabase } from './ConexaoBD';
 import bcrypt from 'bcryptjs';
+import { IoMdDisc } from 'react-icons/io';
 // import forge from 'node-forge';
 export const AppContext = createContext();
 
@@ -173,7 +174,7 @@ export const AppProvider = ({ children }) => {
                 .select('certificado')
                 .eq('id_usuario', idUsuario)
                 .single();
-    
+
             if (usuarioError) {
                 throw new Error('Erro ao verificar usuário:' + usuarioError.message);
             }
@@ -181,22 +182,22 @@ export const AppProvider = ({ children }) => {
                 alert('Um certificado já foi gerado para este usuário.');
                 return usuarioData.certificadoDados;
             }
-    
+
             const publicKeyPem = await buscarChavePublica(idUsuario);
             if (!publicKeyPem) {
                 throw new Error('Chave pública não encontrada.');
             }
             const publicKey = forge.pki.publicKeyFromPem(publicKeyPem); // transformando a chave em PEM
-    
+
             const cert = forge.pki.createCertificate(); //cria o objeto do certificado
             cert.publicKey = publicKey; // a partir daqui vamos definir as infos do certificado
-    
+
             const numeroDeSerie = idUsuario.replace(/-/g, ''); // número de série
             cert.serialNumber = numeroDeSerie; // converte o UUID para o tipo certo
             cert.validity.notBefore = new Date(); // Data de início de validade
             cert.validity.notAfter = new Date(); // Data de término de validade
             cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1); // Validade de 1 ano
-    
+
             // mudando o dono
             cert.setSubject([
                 { name: 'commonName', value: nome },
@@ -205,7 +206,7 @@ export const AppProvider = ({ children }) => {
                 { name: 'localityName', value: 'Palmas' },
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
-            
+
             // mudando o emissor do certificado (nois)
             cert.setIssuer([
                 { name: 'commonName', value: 'JAMA Certificado Digital' },
@@ -214,17 +215,17 @@ export const AppProvider = ({ children }) => {
                 { name: 'localityName', value: 'Palmas' },
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
-    
+
             const privateKeyPem = await buscarChavePrivada(idUsuario); //pega chave privada
             if (!privateKeyPem) {
                 throw new Error('Chave privada não encontrada.');
             }
             const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-    
+
             cert.sign(privateKey); // Assina o certificado
-    
+
             const pemCert = forge.pki.certificateToPem(cert); //pega o pem do certificado
-    
+
             const dadosCertificado = { // isso foi firula que inventei pra apresentar bonitinho os dados
                 commonName: nome, country: 'BR (Brasil)', state: 'TO', locality: 'Palmas', organization: 'FC Solutions',
                 serialNumber: numeroDeSerie, validity: {
@@ -232,49 +233,49 @@ export const AppProvider = ({ children }) => {
                     notAfter: cert.validity.notAfter.toISOString().split('T')[0]
                 }
             };
-    
+
             //---- SALVAR O .PEMMMMM ------
             const { data: dados, error: uploadError } = await supabase.storage
                 .from('certificado')
                 .upload(`${idUsuario}.pem`, pemCert);
-    
+
             if (uploadError) {
                 throw new Error('Erro ao fazer upload do certificado: ' + uploadError.message);
             }
-    
+
             const caminho = dados.path;
-    
+
             // Obter a URL pública do arquivo salvo
             const { data: publicData, error: urlError } = supabase
                 .storage
                 .from('certificado')
                 .getPublicUrl(caminho);
-    
+
             if (urlError) {
                 throw new Error('Erro ao obter URL pública: ' + urlError.message);
             }
-    
+
             const linkCert = publicData.publicUrl;
-    
+
             //---- SALVAR ISSO NO BANCO EM NOME DE JESUS ------
             const { data: updateData, error: updateError } = await supabase
                 .from('Usuario')
                 .update({ certificado: pemCert, certificadoDados: dadosCertificado, link_certificado: linkCert })
                 .eq('id_usuario', idUsuario);
-    
+
             if (updateError) {
                 throw new Error('Erro ao atualizar dados do usuário: ' + updateError.message);
             } else {
                 console.log('Certificado armazenado com sucesso:', updateData);
             }
             return cert;
-    
+
         } catch (error) {
             console.error('Erro ao gerar certificado:', error.message || error);
             return null;
         }
     };
-    
+
 
     //--------------------- DADOS USUÁRIO  ------------------
     const buscarUsuarioPorId = async (idUsuario) => {
@@ -298,21 +299,30 @@ export const AppProvider = ({ children }) => {
     };
 
     // ----------- BUSCAR CHAVES --------------------
-
     const buscarChavePrivada = async (idUsuario) => {
         try {
-            const { data, error } = await supabase
-                .from('Usuario')
-                .select('chave_privada')
-                .eq('id_usuario', idUsuario);
+            const nomeArquivo = `${idUsuario}.pem`;
 
-            if (error || !data.length) {
-                console.error('Erro ao buscar chaves', error);
+            const { data, error } = supabase
+                .storage
+                .from('chave')
+                .getPublicUrl(nomeArquivo);
+
+            if (error || !data || !data.publicUrl) {
+                console.error('Erro ao buscar a URL pública da chave privada:', error);
                 return null;
             }
 
-            const privateKey = (data[0].chave_privada);
-            return privateKey;
+            const linkChavePrivada = data.publicUrl;
+
+            const response = await fetch(linkChavePrivada);
+            if (!response.ok) {
+                throw new Error('Erro ao baixar o arquivo: ' + response.statusText);
+            }
+
+            const pemContent = await response.text();
+
+            return pemContent;
         } catch (error) {
             console.error('Erro ao buscar chave privada', error.message || error);
             return null;
@@ -331,10 +341,10 @@ export const AppProvider = ({ children }) => {
                     console.error('Erro ao buscar chave pública', error);
                     return null;
                 }
-
-                const publicKey = (data[0].chave_publica);
-                return publicKey;
             }
+            const publicKey = (data[0].chave_publica);
+            return publicKey;
+
         } catch (error) {
             console.error('Erro ao importar chave pública', error.message || error);
             return null;
@@ -347,7 +357,7 @@ export const AppProvider = ({ children }) => {
             const dados = await buscarUsuarioPorId(idUsuario);
             const cert = dados.certificado;
             if (!cert) {
-                throw new Error('Certificado não encontrado ou inválido');
+                return 'erroCert';
             }
 
             const privateKeyPem = await buscarChavePrivada(idUsuario);
@@ -454,13 +464,12 @@ export const AppProvider = ({ children }) => {
                     ...documento,
                     assinaturaHash: assinatura.assinatura_hash,
                     assinadoEm: assinatura.assinado_em,
-                    assinatura:assinatura.assinatura
+                    assinatura: assinatura.assinatura
                 };
             });
 
         setDocumentosNaoAssinados(documentosNaoAssinados);
         setDocumentosAssinados(documentosAssinados);
-        console.log(documentosAssinados)
     };
 
     useEffect(() => {
@@ -472,37 +481,52 @@ export const AppProvider = ({ children }) => {
 
     // ----------- VERIFICAR ASSINATURA --------------------
     const obterCertificado = async (idUsuario) => {
-        const { data, error } = await supabase
-            .from('Usuario')
-            .select('certificado')
-            .eq('id_usuario', idUsuario)
+        try {
+            const nomeArquivo = `${idUsuario}.pem`;
+            const { data, error } = supabase
+                .storage
+                .from('certificado')
+                .getPublicUrl(nomeArquivo);
 
-        if (error) {
-            throw new Error('Erro ao obter certificado: ' + error.message);
+            if (error || !data || !data.publicUrl) {
+                console.error('Erro ao buscar a URL pública do certificado', error);
+                return null;
+            }
+            const linkCertificado = data.publicUrl;
+            const response = await fetch(linkCertificado);
+            const pemContent = await response.text();
+            return pemContent;
+        } catch (error) {
+            console.error('Erro ao buscar certificado', error.message || error);
+            return null;
         }
-
-        return data[0].certificado;
     };
 
     const extrairChavePublica = async (certificado) => {
         try {
             const pegaCertificado = forge.pki.certificateFromPem(certificado);
             const chavePublica = pegaCertificado.publicKey;
-            return chavePublica;
+            const chavePublicaPem = forge.pki.publicKeyToPem(chavePublica);
+            return chavePublicaPem;
         } catch (error) {
             console.error('Erro ao extrair chave pública:', error);
         }
     };
 
-    function verificarAssinatura4(documento, assinaturaBase64, chavePublica) {
+    const verificarAssinatura4 = async (idDocumento, documento, chavePublica) => {
         try {
-            // Cria o hash do documento usando SHA-256
+            const { data, error } = await supabase
+                .from('Assinatura')
+                .select('assinatura')
+                .eq('id_documento', idDocumento)
+                .single();
+            console.log(data);
             const md = forge.md.sha256.create();
             md.update(documento, 'utf8');  // Documento original que foi assinado
-    
+
             // Decodifica a assinatura de Base64 para bytes
-            const assinatura = forge.util.decode64(assinaturaBase64);
-    
+            const assinatura = forge.util.decode64(data);
+
             // Verifica a assinatura com a chave pública
             const isValid = chavePublica.verify(md.digest().bytes(), assinatura);
             console.log(isValid)
@@ -523,14 +547,14 @@ export const AppProvider = ({ children }) => {
             certificado,
             buscarChavePublica,
             buscarUsuarioPorId,
-            assinar,
             obterCertificado,
             extrairChavePublica,
             assinar,
             documentosNaoAssinados,
             documentosAssinados,
             fetchDocumentos,
-            verificarAssinatura4
+            verificarAssinatura4,
+            buscarChavePrivada
         }}>
             {children}
         </AppContext.Provider>

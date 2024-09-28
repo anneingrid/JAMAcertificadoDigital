@@ -20,21 +20,31 @@ const ListaDocumentos = () => {
 
     const assinarDocumento = async (idDocumento, descricao) => {
         setCarregandoDocumento((prev) => ({ ...prev, [idDocumento]: true })); // Iniciar carregamento para documento específico
+    
         try {
             const resultado = await assinar(idDocumento, usuarioLogado.id_usuario, descricao);
-            if (resultado) {
+    
+            if (resultado === 'erroCert') {
+                setToastMessage('❌ Erro: Certificado não encontrado, crie um para assinar!');
+
+            } else if (resultado) {
                 setToastMessage('✅ Assinatura gerada com sucesso! Hash: ' + resultado);
-                setShowToast(true);
-                fetchDocumentos();
+
+            } else {
+                setToastMessage('❌ Erro ao assinar o documento.');
             }
+    
+            setShowToast(true); 
+            fetchDocumentos(); 
         } catch (error) {
             console.error('Erro ao assinar o documento:', error.message);
-            setToastMessage('❌ Erro ao assinar o documento.');
+            setToastMessage('❌ Erro ao assinar o documento: ' + error.message);
             setShowToast(true);
         } finally {
-            setCarregandoDocumento((prev) => ({ ...prev, [idDocumento]: false })); // Finalizar carregamento
+            setCarregandoDocumento((prev) => ({ ...prev, [idDocumento]: false })); 
         }
     };
+    
 
     const placeholderStyles = {
         borderBottom: '1px solid lightgray',
@@ -131,7 +141,7 @@ const ListaDocumentos = () => {
                                                 </a>
                                             </div>
                                             <div className="dados">
-                                                <strong>Hash do documento:</strong> {documento.hash_do_documento}
+                                                <strong>Hash do documento:</strong> {documento.hash_do_documento.substring(0,20)}...
                                             </div>
                                         </div>
 

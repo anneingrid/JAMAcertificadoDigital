@@ -7,6 +7,7 @@ import CertificadoDigital from '../components/CertificadoDigital';
 import { FaArrowRightFromBracket } from 'react-icons/fa6';
 import ListaDocumentos from '../components/Documentos';
 import ListaDocumentosAssinados from '../components/DocsAssinados';
+import Footer from '../components/Footer';
 
 
 
@@ -67,7 +68,9 @@ function Principal() {
           <ListaDocumentosAssinados></ListaDocumentosAssinados>
         </div>
       </div>
-
+      <div>
+        <Footer></Footer>
+      </div>
     </div>
   );
 }
