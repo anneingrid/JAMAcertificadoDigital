@@ -173,7 +173,7 @@ export const AppProvider = ({ children }) => {
                 .select('certificado')
                 .eq('id_usuario', idUsuario)
                 .single();
-
+    
             if (usuarioError) {
                 throw new Error('Erro ao verificar usuário:' + usuarioError.message);
             }
@@ -181,20 +181,23 @@ export const AppProvider = ({ children }) => {
                 alert('Um certificado já foi gerado para este usuário.');
                 return usuarioData.certificadoDados;
             }
-
+    
             const publicKeyPem = await buscarChavePublica(idUsuario);
+            if (!publicKeyPem) {
+                throw new Error('Chave pública não encontrada.');
+            }
             const publicKey = forge.pki.publicKeyFromPem(publicKeyPem); // transformando a chave em PEM
-
+    
             const cert = forge.pki.createCertificate(); //cria o objeto do certificado
             cert.publicKey = publicKey; // a partir daqui vamos definir as infos do certificado
-
+    
             const numeroDeSerie = idUsuario.replace(/-/g, ''); // número de série
             cert.serialNumber = numeroDeSerie; // converte o UUID para o tipo certo
-            cert.validity.notBefore = new Date();
-            cert.validity.notAfter = new Date();
+            cert.validity.notBefore = new Date(); // Data de início de validade
+            cert.validity.notAfter = new Date(); // Data de término de validade
             cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1); // Validade de 1 ano
-
-            //mudando o dono
+    
+            // mudando o dono
             cert.setSubject([
                 { name: 'commonName', value: nome },
                 { name: 'countryName', value: 'BR (Brasil)' },
@@ -202,20 +205,26 @@ export const AppProvider = ({ children }) => {
                 { name: 'localityName', value: 'Palmas' },
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
-            cert.setIssuer([ //mudando o emissor do certificado(nois)
+            
+            // mudando o emissor do certificado (nois)
+            cert.setIssuer([
                 { name: 'commonName', value: 'JAMA Certificado Digital' },
                 { name: 'countryName', value: 'BR (Brasil)' },
                 { shortName: 'ST', value: 'TO' },
                 { name: 'localityName', value: 'Palmas' },
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
-
+    
             const privateKeyPem = await buscarChavePrivada(idUsuario); //pega chave privada
+            if (!privateKeyPem) {
+                throw new Error('Chave privada não encontrada.');
+            }
             const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-            cert.sign(privateKey);
-
+    
+            cert.sign(privateKey); // Assina o certificado
+    
             const pemCert = forge.pki.certificateToPem(cert); //pega o pem do certificado
-
+    
             const dadosCertificado = { // isso foi firula que inventei pra apresentar bonitinho os dados
                 commonName: nome, country: 'BR (Brasil)', state: 'TO', locality: 'Palmas', organization: 'FC Solutions',
                 serialNumber: numeroDeSerie, validity: {
@@ -223,52 +232,49 @@ export const AppProvider = ({ children }) => {
                     notAfter: cert.validity.notAfter.toISOString().split('T')[0]
                 }
             };
-
-            //---- SALVAR O .PEMMMMM------
-
-            const { data: dados, error: erro } = await supabase.storage
+    
+            //---- SALVAR O .PEMMMMM ------
+            const { data: dados, error: uploadError } = await supabase.storage
                 .from('certificado')
                 .upload(`${idUsuario}.pem`, pemCert);
-
-            if (erro) {
-                console.error('Erro ao obter URL pública:', erro.message);
-                alert('Erro ao obter a URL pública do arquivo.');
-                return null;
+    
+            if (uploadError) {
+                throw new Error('Erro ao fazer upload do certificado: ' + uploadError.message);
             }
-
+    
             const caminho = dados.path;
-
+    
+            // Obter a URL pública do arquivo salvo
             const { data: publicData, error: urlError } = supabase
                 .storage
                 .from('certificado')
                 .getPublicUrl(caminho);
-
+    
             if (urlError) {
-                console.error('Erro ao obter URL pública:', urlError.message);
-                alert('Erro ao obter a URL pública do arquivo.');
-                return null;
+                throw new Error('Erro ao obter URL pública: ' + urlError.message);
             }
-
+    
             const linkCert = publicData.publicUrl;
-
+    
             //---- SALVAR ISSO NO BANCO EM NOME DE JESUS ------
-            const { data, error } = await supabase
+            const { data: updateData, error: updateError } = await supabase
                 .from('Usuario')
                 .update({ certificado: pemCert, certificadoDados: dadosCertificado, link_certificado: linkCert })
                 .eq('id_usuario', idUsuario);
-
-            if (error) {
-                throw new Error('Erro:' + error.message);
+    
+            if (updateError) {
+                throw new Error('Erro ao atualizar dados do usuário: ' + updateError.message);
             } else {
-                console.log('Certificado armazenado com sucesso:', data);
+                console.log('Certificado armazenado com sucesso:', updateData);
             }
             return cert;
-
+    
         } catch (error) {
             console.error('Erro ao gerar certificado:', error.message || error);
             return null;
         }
     };
+    
 
     //--------------------- DADOS USUÁRIO  ------------------
     const buscarUsuarioPorId = async (idUsuario) => {

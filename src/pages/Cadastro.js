@@ -135,15 +135,13 @@ function Cadastro() {
             <Toast
                 onClose={() => setShowToast(false)}
                 show={showToast}
-                delay={3000}
+                delay={5000}
                 autohide
                 style={{
                     position: 'fixed',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    minWidth: '400px',
-                    textAlign: 'center',
+                    top: '20px',
+                    right: '20px',
+                    minWidth: '300px',
                     zIndex: 9999
                 }}
             >

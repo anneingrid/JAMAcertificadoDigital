@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AppContext } from '../back/Provider';
 import { FaFileSignature, FaFolder } from 'react-icons/fa';
-import { Accordion, Toast, Placeholder } from 'react-bootstrap';
+import { Accordion, Toast, Placeholder, Spinner } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ThreeDots } from 'react-loader-spinner';
 
 const ListaDocumentos = () => {
     const { usuarioLogado, assinar, documentosNaoAssinados, fetchDocumentos } = useContext(AppContext);
-    const [carregando, setCarregando] = useState(false);
+    const [carregandoDocumento, setCarregandoDocumento] = useState({}); // Estado para carregamento individual por documento
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [buscando, setBuscando] = useState(true);
@@ -18,10 +18,10 @@ const ListaDocumentos = () => {
         }
     }, [documentosNaoAssinados]);
 
-    const assinarDocumento = async (idDocumento) => {
-        setCarregando(true);
+    const assinarDocumento = async (idDocumento, descricao) => {
+        setCarregandoDocumento((prev) => ({ ...prev, [idDocumento]: true })); // Iniciar carregamento para documento específico
         try {
-            const resultado = await assinar(idDocumento, usuarioLogado.id_usuario);
+            const resultado = await assinar(idDocumento, usuarioLogado.id_usuario, descricao);
             if (resultado) {
                 setToastMessage('✅ Assinatura gerada com sucesso! Hash: ' + resultado);
                 setShowToast(true);
@@ -32,96 +32,143 @@ const ListaDocumentos = () => {
             setToastMessage('❌ Erro ao assinar o documento.');
             setShowToast(true);
         } finally {
-            setCarregando(false);
+            setCarregandoDocumento((prev) => ({ ...prev, [idDocumento]: false })); // Finalizar carregamento
         }
     };
 
+    const placeholderStyles = {
+        borderBottom: '1px solid lightgray',
+        padding: '10px',
+        marginBottom: '10px',
+    };
+
+    const emptyStateStyles = {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '40px',
+        backgroundColor: '#f8f9fa',
+        border: '2px dashed #d3d3d3',
+        borderRadius: '12px',
+        maxWidth: '500px',
+        margin: '20px auto',
+        color: '#7a7a7a',
+        textAlign: 'center',
+    };
+
+    const EmptyState = () => (
+        <div style={emptyStateStyles}>
+            <div style={{ marginBottom: '20px' }}>
+                <svg width="64" height="64" fill="#d3d3d3" viewBox="0 0 24 24">
+                    <path d="M19 3H9.42L7.2 1H1v22h22V5a2 2 0 00-2-2zm0 16H5V5h2.58l2.22 2H19z" />
+                </svg>
+            </div>
+            <p style={{ margin: 0, fontSize: '18px' }}>Nenhum documento disponível para assinatura.</p>
+        </div>
+    );
+
+    const PlaceholderItem = ({ index }) => (
+        <Accordion.Item eventKey={index} key={index} style={placeholderStyles}>
+            <Accordion.Header>
+                <div className="placeholder-glow" style={{ margin: '20px 0', padding: '10px' }}>
+                    <p className="placeholder col-12" style={{ height: '16px' }}></p>
+                </div>
+            </Accordion.Header>
+            <Accordion.Body>
+                <Placeholder as="div" animation="glow">
+                    <Placeholder xs={8} className="mb-2" />
+                    <Placeholder xs={6} className="mb-2" />
+                    <Placeholder xs={4} className="mb-2" />
+                </Placeholder>
+            </Accordion.Body>
+        </Accordion.Item>
+    );
+
     return (
         <div>
-            <span className="hdois"><FaFolder className='iconTop' />Documentos</span>
+            <span className="hdois">
+                <FaFolder className="iconTop" /> Documentos
+            </span>
 
             {buscando ? (
-                <div>
-                    <Accordion flush>
-                        {[1, 2, 3].map((_, index) => (
-                            <Accordion.Item
-                                eventKey={index}
-                                key={index}
-                                style={{
-                                    borderBottom: '1px solid lightgray',
-                                    padding: '10px',
-                                    marginBottom: '10px',
-                                }}
-                            >
-                                <Accordion.Header>
-                                    <div className="placeholder-glow" style={{ margin: '20px 0', padding: '10px' }}>
-                                        <p className="placeholder col-12" style={{ height: '16px' }}></p>
-                                    </div>
-                                </Accordion.Header>
-                                <Accordion.Body>
-                                    <Placeholder as="div" animation="glow">
-                                        <Placeholder xs={8} className="mb-2" />
-                                        <Placeholder xs={6} className="mb-2" />
-                                        <Placeholder xs={4} className="mb-2" />
-                                    </Placeholder>
-                                </Accordion.Body>
-                            </Accordion.Item>
-                        ))}
-                    </Accordion>
-                </div>
+                <Accordion flush>
+                    {[1, 2, 3].map((_, index) => (
+                        <PlaceholderItem index={index} key={index} />
+                    ))}
+                </Accordion>
             ) : (
                 <Accordion flush>
-                    {documentosNaoAssinados.map((documento) => (
-                        <Accordion.Item
-                            eventKey={documento.id_documento}
-                            key={documento.id_documento}
-                            style={{
-                                padding: '10px',
-                                marginBottom: '10px',
-                            }}
-                        >
-                            <Accordion.Header>
-                                {documento.id_documento} - {documento.descricao_documento || 'Descrição não disponível'}
-                            </Accordion.Header>
-                            <Accordion.Body>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <div className="dados"><strong>Id:</strong> {documento.id_documento}</div>
-                                        <div className="dados"><strong>Usuário:</strong> {documento.Usuario.nome_usuario}</div>
-                                        <div className="dados"><strong>URL documento:</strong> <a href={documento.urlDocumento} target="_blank" rel="noopener noreferrer">
-                                            <span>Abrir arquivo</span>
-                                        </a></div>
-                                        <div className="dados"><strong>Hash do documento:</strong> {documento.hash_do_documento}</div>
-                                    </div>
+                    {documentosNaoAssinados.length > 0 ? (
+                        documentosNaoAssinados.map((documento) => (
+                            <Accordion.Item
+                                eventKey={documento.id_documento}
+                                key={documento.id_documento}
+                                style={{ padding: '10px', marginBottom: '10px' }}
+                            >
+                                <Accordion.Header>
+                                    {documento.id_documento} - {documento.descricao_documento || 'Descrição não disponível'}
+                                </Accordion.Header>
+                                <Accordion.Body>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <div>
+                                            <div className="dados">
+                                                <strong>Id:</strong> {documento.id_documento}
+                                            </div>
+                                            <div className="dados">
+                                                <strong>Usuário:</strong> {documento.Usuario.nome_usuario}
+                                            </div>
+                                            <div className="dados">
+                                                <strong>URL documento:</strong>{' '}
+                                                <a href={documento.urlDocumento} target="_blank" rel="noopener noreferrer">
+                                                    <span>Abrir arquivo</span>
+                                                </a>
+                                            </div>
+                                            <div className="dados">
+                                                <strong>Hash do documento:</strong> {documento.hash_do_documento}
+                                            </div>
+                                        </div>
 
-                                    <div>
-                                        <button onClick={() => assinarDocumento(documento.id_documento)} className='primary-butao'>
-                                            {carregando ? (
-                                                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                                    <ThreeDots
-                                                        visible={true}
-                                                        height="25"
-                                                        width="25"
-                                                        color="white"
-                                                        secondaryColor="#df003b95"
-                                                        radius="9"
-                                                        ariaLabel="three-dots-loading"
-                                                        wrapperStyle={{}}
-                                                        wrapperClass=""
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <FaFileSignature className='icons' /> Assinar
-                                                </>
-                                            )}
-
-                                        </button>
+                                        <div>
+                                            <button
+                                                onClick={() => assinarDocumento(documento.id_documento, documento.descricao_documento)}
+                                                className="primary-butao"
+                                                disabled={carregandoDocumento[documento.id_documento]}
+                                            >
+                                                {carregandoDocumento[documento.id_documento] ? (
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <Spinner animation="border" size="sm" />
+                                                        </div>
+                                                        <div>Assinando...</div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <FaFileSignature className="icons" /> Assinar
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    ))}
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        ))
+                    ) : (
+                        <EmptyState />
+                    )}
                 </Accordion>
             )}
 
@@ -132,11 +179,9 @@ const ListaDocumentos = () => {
                 autohide
                 style={{
                     position: 'fixed',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    minWidth: '400px',
-                    textAlign: 'center',
+                    top: '20px',
+                    right: '20px',
+                    minWidth: '300px',
                     zIndex: 9999
                 }}
             >

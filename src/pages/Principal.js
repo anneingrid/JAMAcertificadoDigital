@@ -31,30 +31,31 @@ function Principal() {
 
   return (
     <div >
-      <div >
-        <span className="hdois text-center mb-6 cadeado">
+      <div className="header-wrapper">
+        <span className="text-center mb-4 cadeado">
           <img src="/logo.png" alt="JAMA Certificado" className="cadeado-image" />
         </span>
-        <div className="logo-container">
+        <div className="logo-container text-center mb-4">
           <span className="jama-text">JAMA</span><br />
           <span className="certificado-text">Certificado Digital</span>
         </div>
-
-      </div>
-      <div className="divider"></div>
-      <div className="header-container">
-        <h3 className='title-nome'>Olá, <span className="login-link">{usuarioLogado.nome_usuario}</span>! </h3>
-        <button onClick={handleLogout} className="primary"> <FaArrowRightFromBracket /> SAIR </button>
+        <div className="divider mb-4"></div>
+        <div className="header-container text-center">
+          <h3 className='title-nome'>Olá, <span className="login-link">{usuarioLogado.nome_usuario}</span>!</h3>
+          <button onClick={handleLogout} className="primary logout-button">
+            <FaArrowRightFromBracket /> SAIR
+          </button>
+        </div>
       </div>
 
       <div className="cards-container">
-        <div className="card">
+        <div className="cardi">
           <GeradorDeChaves />
         </div>
-        <div className="card">
+        <div className="cardi">
           <CertificadoDigital />
         </div>
-        <div className="card">
+        <div className="cardi">
           <NovoArquivo />
         </div>
       </div>
