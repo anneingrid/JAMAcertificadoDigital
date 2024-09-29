@@ -84,7 +84,7 @@ const NovoArquivo = () => {
         setCarregando(true);
         try {
             const hashGerado = gerarHash(conteudoArquivo);
-            const descricaoArquivo = conteudoArquivo ? conteudoArquivo.substring(0, 10) : 'Descrição padrão';
+            const descricaoArquivo = conteudoArquivo ? conteudoArquivo.substring(0, 20) : 'Descrição padrão';
             const { data: documentoData, error: dbError } = await supabase
                 .from('Documento')
                 .insert({

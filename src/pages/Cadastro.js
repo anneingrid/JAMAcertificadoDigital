@@ -62,7 +62,14 @@ function Cadastro() {
         <Container fluid className="cadastro-container">
             <Row>
                 <Col md={12} className="cadastro-box">
-                    <span className="hdois text-center mb-4 cadastro-title">Por favor, preencha o formulário para se cadastrar!</span>
+                <span className="hdois text-center mb-4 login-title">
+                        <img src="logo.png" alt="JAMA Certificado" className="login-image" style={{width:35}} />
+                    </span>
+                    <div className="logo">
+                        <span className="jama-text-logo" style={{fontSize:16}}>JAMA</span><br />
+                        <span className="certificado-text-logo" style={{fontSize:14}}>Certificado Digital</span>
+                    </div>
+                    <span className="text-center mb-4 cadastro-title">Por favor, preencha o formulário para se cadastrar!</span>
                     {error && <Alert variant="danger">{error}</Alert>}
                     {success && <Alert variant="success">{success}</Alert>}
                     <Form onSubmit={handleSubmit}>

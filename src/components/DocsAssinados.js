@@ -42,7 +42,7 @@ const ListaDocumentosAssinados = () => {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container">
             <h2 className="hdois mb-4">
                 <FaFileContract className='iconTop' /> Documentos Assinados
             </h2>
@@ -86,7 +86,7 @@ const ListaDocumentosAssinados = () => {
                                             }}>
                                                 <strong>Hash Assinatura:</strong> {documento.assinaturaHash.substring(0, 20)}...
                                             </div>
-                                            <div className="dados"><strong>Assinado por:</strong> {documento.id_usuario}</div>
+                                            <div className="dados"><strong>Assinado por:</strong> {documento.Usuario.nome_usuario}</div>
 
 
                                             <div className="dados"><strong>URL documento:</strong> <a href={documento.urlDocumento} target="_blank" rel="noopener noreferrer">
