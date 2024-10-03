@@ -6,8 +6,8 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
     const forge = require('node-forge');
-    // ----------- CERTIFICADO AC--------------------
-    const certificadoAC = async () => {
+    // ----------- CERTIFICADO CA RAIZ--------------------
+    const certificadoCARaiz = async () => {
         try {
             const keys = forge.pki.rsa.generateKeyPair(2048);
 
@@ -78,7 +78,7 @@ export const AppProvider = ({ children }) => {
             } else {
                 console.log(`Arquivo  armazenado com sucesso:`, dados, dados2);
             }
-           
+
             return true;
         } catch (error) {
             console.log(`Erro`, error);
@@ -89,13 +89,80 @@ export const AppProvider = ({ children }) => {
     // ----------- CERTIFICADO INTERMEDIÁRIO -------------------
     const certificadoIntermediario = async () => {
         try {
-           
+            //caça a chave priv do ca raiz
+            const { data, error } = supabase
+                .storage
+                .from('AC')
+                .getPublicUrl('CHAVES.pem');
+
+            if (error || !data || !data.publicUrl) {
+                console.error('Erro ao buscar a URL pública da chave privada:', error);
+                return null;
+            }
+            const linkChavePrivada = data.publicUrl;
+            const response = await fetch(linkChavePrivada);
+            const chavePrivadaPem = await response.text();
+
+            if (!chavePrivadaPem) {
+                throw new Error('Chave privada da CA raiz não encontrada.');
+            }
+            const chavePrivadaCa = forge.pki.privateKeyFromPem(chavePrivadaPem);
+
+            const chaveIntermediaria = forge.pki.rsa.generateKeyPair(2048);
+
+            const certIntermediario = forge.pki.createCertificate();
+            certIntermediario.publicKey = chaveIntermediaria.publicKey;
+
+            certIntermediario.serialNumber = new Date().getTime().toString();
+            certIntermediario.validity.notBefore = new Date();
+            certIntermediario.validity.notAfter = new Date();
+            certIntermediario.validity.notAfter.setFullYear(certIntermediario.validity.notBefore.getFullYear() + 2);
+
+            certIntermediario.setSubject([ // Informações do certificado intermediário
+                { name: 'commonName', value: 'JAMA Certificado Digital' },
+                { name: 'countryName', value: 'BR (Brasil)' },
+                { shortName: 'ST', value: 'TO' },
+                { name: 'localityName', value: 'Palmas' },
+                { name: 'organizationName', value: 'FC Solutions' }
+            ]);
+
+            certIntermediario.setIssuer([ // Emissor é a própria CA raiz
+                { name: 'commonName', value: 'JAMA Certificado Digital' },
+                { name: 'countryName', value: 'BR (Brasil)' },
+                { shortName: 'ST', value: 'TO' },
+                { name: 'localityName', value: 'Palmas' },
+                { name: 'organizationName', value: 'FC Solutions' }
+            ]);
+
+            certIntermediario.sign(chavePrivadaCa);
+            const pemCertIntermediario = forge.pki.certificateToPem(certIntermediario);
+            const pemChaveIntermediaria = forge.pki.privateKeyToPem(chaveIntermediaria.privateKey);
+
+            const { data: dadosCert, error: erroCertUpload } = await supabase
+                .storage
+                .from('intermediario')
+                .upload(`cert_intermediario.pem`, pemCertIntermediario);
+
+            const { data: dadosChave, error: erroChaveUpload } = await supabase
+                .storage
+                .from('intermediario')
+                .upload(`chave_intermediaria.pem`, pemChaveIntermediaria);
+
+            if (erroChaveUpload || erroCertUpload) {
+                throw new Error('Erro ao fazer upload da chave intermediária: ' + erroChaveUpload.message + erroCertUpload.message);
+            }
+
+            console.log('Certificado intermediário e chave privada armazenados com sucesso!');
+            return dadosCert + dadosCert;
         } catch (error) {
-            console.error('Erro durante o login:', error.message || error);
+            console.error('Erro ao criar o certificado intermediário:', error.message || error);
         }
+
     };
+
     // ----------- USUÁRIO LOGADO--------------------
     const [usuarioLogado, setUsuarioLogado] = useState(null);
+
 
     // ----------- CADASTRO USUÁRIO --------------------
     const cadastrarUsuario = async (nome, email, senha) => {
@@ -219,7 +286,7 @@ export const AppProvider = ({ children }) => {
 
             const { data, error } = await supabase
                 .from('Usuario')
-                .update({ chave_publica: chave_publ, chave_privada: chave_priv, link_chave_privada: publicURL, })
+                .update({ chave_publica: chave_publ, link_chave_privada: publicURL, })
                 .match({ id_usuario: idUsuario })
                 .select('*');
 
@@ -240,7 +307,7 @@ export const AppProvider = ({ children }) => {
         try {
             const { data: usuarioData, error: usuarioError } = await supabase
                 .from('Usuario')
-                .select('certificado')
+                .select('certificadoDados')
                 .eq('id_usuario', idUsuario)
                 .single();
 
@@ -285,13 +352,13 @@ export const AppProvider = ({ children }) => {
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
 
-            const privateKeyPem = await buscarChavePrivada(idUsuario); //pega chave privada
+            const privateKeyPem = await buscarChavePrivadaIntermediaria(idUsuario); //pega chave privada
             if (!privateKeyPem) {
                 throw new Error('Chave privada não encontrada.');
             }
-            const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
+            const privateKeyIntermediaria = forge.pki.privateKeyFromPem(privateKeyPem);
 
-            cert.sign(privateKey); // Assina o certificado
+            cert.sign(privateKeyIntermediaria); // Assina o certificado
 
             const pemCert = forge.pki.certificateToPem(cert); //pega o pem do certificado
 
@@ -329,7 +396,7 @@ export const AppProvider = ({ children }) => {
             //---- SALVAR ISSO NO BANCO EM NOME DE JESUS ------
             const { data: updateData, error: updateError } = await supabase
                 .from('Usuario')
-                .update({ certificado: pemCert, certificadoDados: dadosCertificado, link_certificado: linkCert })
+                .update({ certificadoDados: dadosCertificado, link_certificado: linkCert })
                 .eq('id_usuario', idUsuario);
 
             if (updateError) {
@@ -424,7 +491,7 @@ export const AppProvider = ({ children }) => {
     const assinar = async (idDocumento, idUsuario, text) => {
         try {
             const dados = await buscarUsuarioPorId(idUsuario);
-            const cert = dados.certificado;
+            const cert = dados.certificadoDados;
             if (!cert) {
                 return 'erroCert';
             }
@@ -461,57 +528,6 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    // ----------- LISTAGEM (TIVE QUE BOTAR AQUI) --------------------
-    const [documentosNaoAssinados, setDocumentosNaoAssinados] = useState([]);
-    const [documentosAssinados, setDocumentosAssinados] = useState([]);
-
-    const fetchDocumentos = async () => {
-        const { data: documentos, error: errorDocumentos } = await supabase
-            .from('Documento')
-            .select(`
-        *,
-        Usuario (
-            id_usuario,
-            nome_usuario
-        )
-    `);
-
-        const { data: assinaturas, error: errorAssinaturas } = await supabase
-            .from('Assinatura')
-            .select('id_documento, assinatura_hash, assinado_em, assinatura');
-
-        if (errorDocumentos || errorAssinaturas) {
-            console.error('Erro ao buscar documentos ou assinaturas:', errorDocumentos?.message || errorAssinaturas?.message);
-            return;
-        }
-
-        const idsAssinados = assinaturas.map(assinatura => assinatura.id_documento);
-
-        const documentosNaoAssinados = documentos.filter(documento => !idsAssinados.includes(documento.id_documento));
-
-        const documentosAssinados = documentos
-            .filter(documento => idsAssinados.includes(documento.id_documento))
-            .map(documento => {
-                const assinatura = assinaturas.find(a => a.id_documento === documento.id_documento);
-                return {
-                    ...documento,
-                    assinaturaHash: assinatura.assinatura_hash,
-                    assinadoEm: assinatura.assinado_em,
-                    assinatura: assinatura.assinatura
-                };
-            });
-
-        setDocumentosNaoAssinados(documentosNaoAssinados);
-        setDocumentosAssinados(documentosAssinados);
-    };
-
-    useEffect(() => {
-        fetchDocumentos();
-    }, [usuarioLogado]);
-
-
-
-
     // ----------- VERIFICAR ASSINATURA --------------------
     const obterCertificado = async (idUsuario) => {
         try {
@@ -546,7 +562,7 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    const verificarAssinatura4 = async (idDocumento, documento, chavePublica) => {
+    const verificarAssinatura = async (idDocumento, documento, chavePublica) => {
         try {
             const { data, error } = await supabase
                 .from('Assinatura')
@@ -570,6 +586,18 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+    const buscarChavePrivadaIntermediaria = async () => {
+        const { data, error } = supabase
+                .storage
+                .from('intermediario')
+                .getPublicUrl('chave_intermediaria.pem');
+            if (error || !data || !data.publicUrl) {
+                console.error('Erro ao buscar a URL pública da chave privada:', error);
+                return null;}
+            const linkChavePrivada = data.publicUrl;
+            const response = await fetch(linkChavePrivada);
+        return await response.text();
+    };
 
     return (
         <AppContext.Provider value={{
@@ -583,10 +611,7 @@ export const AppProvider = ({ children }) => {
             obterCertificado,
             extrairChavePublica,
             assinar,
-            documentosNaoAssinados,
-            documentosAssinados,
-            fetchDocumentos,
-            verificarAssinatura4,
+            verificarAssinatura,
             buscarChavePrivada
         }}>
             {children}

@@ -3,9 +3,11 @@ import { Accordion, Toast, Spinner } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaEye, FaFileContract } from 'react-icons/fa';
 import { AppContext } from '../back/Provider';
+import useDocumentos from '../back/Listagem';
 
 const ListaDocumentosAssinados = () => {
-    const { documentosAssinados, extrairChavePublica, obterCertificado, usuarioLogado, verificarAssinatura4 } = useContext(AppContext);
+    const { extrairChavePublica, obterCertificado, usuarioLogado, verificarAssinatura } = useContext(AppContext);
+    const { documentosAssinados, fetchDocumentos } = useDocumentos(usuarioLogado);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [carregando, setCarregando] = useState(false);
@@ -15,7 +17,7 @@ const ListaDocumentosAssinados = () => {
         if (documentosAssinados) {
             setBuscando(false);
         }
-
+        fetchDocumentos();
     }, [documentosAssinados]);
 
 
@@ -24,7 +26,7 @@ const ListaDocumentosAssinados = () => {
         try {
             const certificado = await obterCertificado(usuarioLogado.id_usuario);
             const chavePublica = await extrairChavePublica(certificado);
-            const resultado = verificarAssinatura4(idDocumento, documento, chavePublica);
+            const resultado = verificarAssinatura(idDocumento, documento, chavePublica);
             console.log(resultado)
             if (resultado) {
                 setToastMessage('✅Assinatura válida!');
@@ -97,7 +99,7 @@ const ListaDocumentosAssinados = () => {
 
 
                                         <button className='primary-butao'
-                                            onClick={() => verificar(documento.id_documento,documento.descricao_documento)}
+                                            onClick={() => verificar(documento.id_documento, documento.descricao_documento)}
 
                                         >
                                             {carregando ? (

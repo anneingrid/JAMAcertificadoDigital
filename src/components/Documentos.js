@@ -3,11 +3,12 @@ import { AppContext } from '../back/Provider';
 import { FaFileSignature, FaFolder } from 'react-icons/fa';
 import { Accordion, Toast, Placeholder, Spinner } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { ThreeDots } from 'react-loader-spinner';
+import useDocumentos from '../back/Listagem';
 
 const ListaDocumentos = () => {
-    const { usuarioLogado, assinar, documentosNaoAssinados, fetchDocumentos } = useContext(AppContext);
-    const [carregandoDocumento, setCarregandoDocumento] = useState({}); // Estado para carregamento individual por documento
+    const { usuarioLogado, assinar} = useContext(AppContext);
+    const { documentosNaoAssinados, fetchDocumentos } = useDocumentos(usuarioLogado);
+    const [carregandoDocumento, setCarregandoDocumento] = useState({}); 
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [buscando, setBuscando] = useState(true);
@@ -19,7 +20,7 @@ const ListaDocumentos = () => {
     }, [documentosNaoAssinados]);
 
     const assinarDocumento = async (idDocumento, descricao) => {
-        setCarregandoDocumento((prev) => ({ ...prev, [idDocumento]: true })); // Iniciar carregamento para documento específico
+        setCarregandoDocumento((prev) => ({ ...prev, [idDocumento]: true })); 
     
         try {
             const resultado = await assinar(idDocumento, usuarioLogado.id_usuario, descricao);
@@ -49,7 +50,6 @@ const ListaDocumentos = () => {
     const placeholderStyles = {
         borderBottom: '1px solid lightgray',
         padding: '10px',
-        marginBottom: '10px',
     };
 
     const emptyStateStyles = {
@@ -97,7 +97,7 @@ const ListaDocumentos = () => {
 
     return (
         <div>
-            <span className="hdois">
+            <span className="hdois mb-4">
                 <FaFolder className="iconTop" /> Documentos
             </span>
 
@@ -114,7 +114,7 @@ const ListaDocumentos = () => {
                             <Accordion.Item
                                 eventKey={documento.id_documento}
                                 key={documento.id_documento}
-                                style={{ padding: '10px', marginBottom: '10px' }}
+                                
                             >
                                 <Accordion.Header>
                                     {documento.id_documento} - {documento.descricao_documento || 'Descrição não disponível'}
