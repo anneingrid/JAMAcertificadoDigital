@@ -1,17 +1,102 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { supabase } from './ConexaoBD';
 import bcrypt from 'bcryptjs';
-import { IoMdDisc } from 'react-icons/io';
-// import forge from 'node-forge';
 export const AppContext = createContext();
 
 
 export const AppProvider = ({ children }) => {
     const forge = require('node-forge');
+    // ----------- CERTIFICADO AC--------------------
+    const certificadoAC = async () => {
+        try {
+            const keys = forge.pki.rsa.generateKeyPair(2048);
 
+            const cert = forge.pki.createCertificate();
+
+            // Atribuir a chave pública ao certificado
+            cert.publicKey = keys.publicKey;
+
+            // Definir o número de série do certificado
+            cert.serialNumber = (new Date().getTime()).toString(16);
+
+            // Definir as datas de validade do certificado
+            cert.validity.notBefore = new Date();
+            cert.validity.notAfter = new Date();
+            cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);  // Válido por 10 anos
+
+            // Configurar os campos "subject" (quem o certificado representa)
+            cert.setSubject([
+                { name: 'commonName', value: 'Certificado Raiz CA' },
+                { name: 'countryName', value: 'BR' },
+                { name: 'stateOrProvinceName', value: 'Tocantins' },
+                { name: 'localityName', value: 'Palmas' },
+                { name: 'organizationName', value: 'FC Solutions' }
+            ]);
+
+            // Configurar os campos "issuer" (a própria CA raiz é a emissora)
+            cert.setIssuer([
+                { name: 'commonName', value: 'Certificado Raiz CA' },
+                { name: 'countryName', value: 'BR' },
+                { name: 'stateOrProvinceName', value: 'Tocantins' },
+                { name: 'localityName', value: 'Palmas' },
+                { name: 'organizationName', value: 'FC Solutions' }
+            ]);
+
+            // Adicionar extensões ao certificado
+            cert.setExtensions([
+                {
+                    name: 'basicConstraints',
+                    cA: true,  // Este certificado é de uma CA
+                    critical: true
+                },
+                {
+                    name: 'keyUsage',
+                    keyCertSign: true,  // O certificado pode assinar outros certificados
+                    cRLSign: true,  // O certificado pode assinar listas de revogação
+                },
+                {
+                    name: 'subjectKeyIdentifier'
+                }
+            ]);
+
+            // Assinar o certificado com a chave privada
+            cert.sign(keys.privateKey, forge.md.sha256.create());
+
+            // Converter o certificado e a chave privada para PEM (formato legível)
+            const pemCert = forge.pki.certificateToPem(cert);
+            const pemKey = forge.pki.privateKeyToPem(keys.privateKey);
+
+            //SALVANDO NO BUCKET
+            const { data: dados, error: erro } = await supabase.storage
+                .from('AC')
+                .upload(`CHAVES.pem`, pemKey);
+            const { data: dados2, error: erro2 } = await supabase.storage
+                .from('AC')
+                .upload(`CERT.pem`, pemCert);
+            if (erro || erro2) {
+                console.error(`Erro ao fazer upload do arquivo:`, erro.message);
+            } else {
+                console.log(`Arquivo  armazenado com sucesso:`, dados, dados2);
+            }
+           
+            return true;
+        } catch (error) {
+            console.log(`Erro`, error);
+
+        }
+    };
+
+    // ----------- CERTIFICADO INTERMEDIÁRIO -------------------
+    const certificadoIntermediario = async () => {
+        try {
+           
+        } catch (error) {
+            console.error('Erro durante o login:', error.message || error);
+        }
+    };
     // ----------- USUÁRIO LOGADO--------------------
-     const [usuarioLogado, setUsuarioLogado] = useState(null);
-     
+    const [usuarioLogado, setUsuarioLogado] = useState(null);
+
     // ----------- CADASTRO USUÁRIO --------------------
     const cadastrarUsuario = async (nome, email, senha) => {
         try {
@@ -373,42 +458,6 @@ export const AppProvider = ({ children }) => {
         } catch (error) {
             console.error('Erro ao gerar a assinatura:', error.message || error);
             return null;
-        }
-    };
-
-    // ----------- VERIFICAR ASSINATURA --------------------
-    const verificarAssinatura = async (idUsuario, textoOriginal, assinaturaBase64) => {
-        try {
-            // 1. Obter o certificado do usuário
-            const { data: usuarioData, error: usuarioError } = await supabase
-                .from('Usuario')
-                .select('certificado')
-                .eq('id_usuario', idUsuario)
-                .single();
-
-            if (usuarioError) {
-                throw new Error('Erro ao verificar usuário: ' + usuarioError.message);
-            }
-
-            const certificadoPem = usuarioData.certificado;
-            const publicKey = forge.pki.certificateFromPem(certificadoPem).publicKey;
-
-            // 2. Gerar hash do texto original
-            const md = forge.md.sha512.create();
-            md.update(textoOriginal, 'utf8');
-            const hashTexto = md.digest();
-
-            // 3. Decodificar a assinatura em Base64
-            const assinatura = forge.util.decode64(assinaturaBase64);
-
-            // 4. Verificar a assinatura
-            const isValid = publicKey.verify(md.algorithm, hashTexto.bytes(), assinatura);
-
-            return isValid;
-
-        } catch (error) {
-            console.error('Erro ao verificar a assinatura:', error.message || error);
-            return false;
         }
     };
 
