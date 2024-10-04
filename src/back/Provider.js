@@ -471,16 +471,10 @@ export const AppProvider = ({ children }) => {
     // ----------- ASSINAR --------------------
     const assinar = async (idDocumento, idUsuario, text) => {
         try {
-            const dados = await buscarUsuarioPorId(idUsuario);
-            const cert = dados.certificadoDados;
-            if (!cert) {
-                return 'erroCert';
-            }
-
             const privateKeyPem = await buscarChavePrivada(idUsuario);
             const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
 
-            const md = forge.md.sha512.create();
+            const md = forge.md.sha256.create();
             md.update(text, 'utf8');
             const signature = privateKey.sign(md);
 
@@ -497,7 +491,11 @@ export const AppProvider = ({ children }) => {
                     assinatura_hash: md.digest().toHex(),
                 }]);
 
-            if (error) {
+            const { data: dade, error: uploadError } = await supabase.storage
+                .from('assinaturas')
+                .upload(`${idDocumento}.pem`, forge.util.encode64(signature));
+
+            if (error || uploadError) {
                 console.error('Erro ao inserir a assinatura:', error.message || error);
                 return null;
             }
