@@ -13,18 +13,14 @@ export const AppProvider = ({ children }) => {
 
             const cert = forge.pki.createCertificate();
 
-            // Atribuir a chave pública ao certificado
             cert.publicKey = keys.publicKey;
 
-            // Definir o número de série do certificado
             cert.serialNumber = (new Date().getTime()).toString(16);
 
-            // Definir as datas de validade do certificado
             cert.validity.notBefore = new Date();
             cert.validity.notAfter = new Date();
             cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);  // Válido por 10 anos
 
-            // Configurar os campos "subject" (quem o certificado representa)
             cert.setSubject([
                 { name: 'commonName', value: 'Certificado Raiz CA' },
                 { name: 'countryName', value: 'BR' },
@@ -33,7 +29,6 @@ export const AppProvider = ({ children }) => {
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
 
-            // Configurar os campos "issuer" (a própria CA raiz é a emissora)
             cert.setIssuer([
                 { name: 'commonName', value: 'Certificado Raiz CA' },
                 { name: 'countryName', value: 'BR' },
@@ -42,31 +37,17 @@ export const AppProvider = ({ children }) => {
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
 
-            // Adicionar extensões ao certificado
             cert.setExtensions([
-                {
-                    name: 'basicConstraints',
-                    cA: true,  // Este certificado é de uma CA
-                    critical: true
-                },
-                {
-                    name: 'keyUsage',
-                    keyCertSign: true,  // O certificado pode assinar outros certificados
-                    cRLSign: true,  // O certificado pode assinar listas de revogação
-                },
-                {
-                    name: 'subjectKeyIdentifier'
-                }
+                { name: 'basicConstraints', cA: true, critical: true },
+                { name: 'keyUsage', keyCertSign: true, cRLSign: true, },
+                { name: 'subjectKeyIdentifier' }
             ]);
 
-            // Assinar o certificado com a chave privada
             cert.sign(keys.privateKey, forge.md.sha256.create());
 
-            // Converter o certificado e a chave privada para PEM (formato legível)
             const pemCert = forge.pki.certificateToPem(cert);
             const pemKey = forge.pki.privateKeyToPem(keys.privateKey);
 
-            //SALVANDO NO BUCKET
             const { data: dados, error: erro } = await supabase.storage
                 .from('AC')
                 .upload(`CHAVES.pem`, pemKey);
@@ -134,7 +115,7 @@ export const AppProvider = ({ children }) => {
                 { name: 'organizationName', value: 'FC Solutions' }
             ]);
 
-            certIntermediario.sign(chavePrivadaCa);
+            certIntermediario.sign(chavePrivadaCa, forge.md.sha256.create());
             const pemCertIntermediario = forge.pki.certificateToPem(certIntermediario);
             const pemChaveIntermediaria = forge.pki.privateKeyToPem(chaveIntermediaria.privateKey);
 
@@ -358,7 +339,7 @@ export const AppProvider = ({ children }) => {
             }
             const privateKeyIntermediaria = forge.pki.privateKeyFromPem(privateKeyPem);
 
-            cert.sign(privateKeyIntermediaria); // Assina o certificado
+            cert.sign(privateKeyIntermediaria, forge.md.sha256.create()); // Assina o certificado
 
             const pemCert = forge.pki.certificateToPem(cert); //pega o pem do certificado
 
@@ -588,14 +569,15 @@ export const AppProvider = ({ children }) => {
 
     const buscarChavePrivadaIntermediaria = async () => {
         const { data, error } = supabase
-                .storage
-                .from('intermediario')
-                .getPublicUrl('chave_intermediaria.pem');
-            if (error || !data || !data.publicUrl) {
-                console.error('Erro ao buscar a URL pública da chave privada:', error);
-                return null;}
-            const linkChavePrivada = data.publicUrl;
-            const response = await fetch(linkChavePrivada);
+            .storage
+            .from('intermediario')
+            .getPublicUrl('chave_intermediaria.pem');
+        if (error || !data || !data.publicUrl) {
+            console.error('Erro ao buscar a URL pública da chave privada:', error);
+            return null;
+        }
+        const linkChavePrivada = data.publicUrl;
+        const response = await fetch(linkChavePrivada);
         return await response.text();
     };
 
